@@ -3,7 +3,11 @@ import { Brand } from './brand'
 import { Link } from 'gatsby'
 
 export const Navbar = () => (
-  <nav className="navbar" role="navigation" aria-label="main navigation">
+  <nav
+    className="navbar is-family-primary"
+    role="navigation"
+    aria-label="main navigation"
+  >
     <div className="navbar-brand" style={{ marginLeft: 27 }}>
       <Link className="navbar-item" to="/">
         <Brand />

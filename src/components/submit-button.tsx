@@ -11,9 +11,13 @@ export const SubmitButton: React.FunctionComponent<SubmitButtonProps> = ({
   onClick,
   disabled,
 }) => (
-  <div className="control">
-    <button className="button is-primary" onClick={onClick} disabled={disabled}>
-      {label}
-    </button>
+  <div className="control is-family-primary">
+    <input
+      type="submit"
+      className="button is-primary"
+      onClick={onClick}
+      disabled={disabled}
+      value={label}
+    />
   </div>
 )

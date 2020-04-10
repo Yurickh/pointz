@@ -23,7 +23,6 @@ export const FormLayout: React.FunctionComponent<FormLayoutProps> = ({
 
             <form
               className={`field ${grouped ? 'is-grouped' : ''}`}
-              style={{ fontFamily: 'sans-serif' }}
               onSubmit={onSubmit}
             >
               {children}

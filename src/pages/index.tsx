@@ -3,7 +3,7 @@ import { navigate } from 'gatsby'
 
 import { FormLayout } from '../layouts/form'
 import { SEO } from '../components/seo'
-import { toRoomName } from '../utils/to-room-name'
+import { toRoomId } from '../utils/room-name'
 import { TextInput } from '../components/text-input'
 import { SubmitButton } from '../components/submit-button'
 
@@ -20,7 +20,7 @@ const CreateARoom = () => {
     event.preventDefault()
 
     if (name) {
-      navigate(`/room/${toRoomName(name)}`)
+      navigate(`/room/${toRoomId(name)}`)
     } else {
       setError(true)
     }
@@ -37,6 +37,7 @@ const CreateARoom = () => {
         error={
           error && 'Please provide a room name with at least one character'
         }
+        help="If someone chooses the same name, you'll end up in the same room!"
       />
       <SubmitButton
         label="Create"

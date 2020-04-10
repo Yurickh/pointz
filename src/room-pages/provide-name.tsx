@@ -41,7 +41,6 @@ export const ProvideName = ({
         value={name}
         onChange={handleChange}
         error={error && 'Please provide a name with at least one character'}
-        help="If someone chooses the same name, you'll end up in the same room!"
       />
       <SubmitButton
         onClick={handleSubmit}

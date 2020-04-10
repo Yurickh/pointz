@@ -4,7 +4,7 @@ import { RouteComponentProps } from '@reach/router'
 import { BaseLayout } from '../layouts/base'
 import { getUserName } from '../utils/user'
 import { joinRoom, leaveRoom, useActiveTicket } from '../utils/room'
-import { ProvideTicket } from './provide-ticket'
+import { WaitingRoom } from './waiting-room'
 import { Vote } from './vote'
 
 export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
@@ -25,10 +25,10 @@ export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
   }, [roomId, username])
 
   if (isLoading) {
-    return <BaseLayout>Loading...</BaseLayout>
+    return <BaseLayout> </BaseLayout>
   }
 
-  const Content = activeTicket ? Vote : ProvideTicket
+  const Content = activeTicket ? Vote : WaitingRoom
 
   return <Content roomId={roomId} />
 }
