@@ -5,9 +5,9 @@ import { FormLayout } from '../layouts/form'
 import { SEO } from '../components/seo'
 import { TextInput } from '../components/text-input'
 import { SubmitButton } from '../components/submit-button'
-import { BaseLayout } from '../layouts/base'
 import { toRoomName } from '../utils/room-name'
 import { useActiveTicket } from '../utils/room'
+import { PageLayout } from '../layouts/page'
 
 const ProvideTicket = ({ roomId, onCancel, onSuccess }) => {
   const [ticketName, setTicketName] = React.useState('')
@@ -64,32 +64,26 @@ export const WaitingRoom = ({
   }
 
   return (
-    <BaseLayout>
+    <PageLayout
+      title={
+        <>
+          Welcome to the{' '}
+          <span className="has-text-primary">{toRoomName(roomId)}</span> room!
+        </>
+      }
+    >
       <SEO title={toRoomName(roomId)} />
-      <div className="columns">
-        <div className="column is-half is-offset-one-quarter">
-          <section className="section">
-            <div className="container">
-              <h1 className="title">
-                Welcome to the{' '}
-                <span className="has-text-primary">{toRoomName(roomId)}</span>{' '}
-                room!
-              </h1>
-              <p className="subtitle is-family-secondary">
-                Here you can either wait for your teammembers to create a
-                request for votes, or you can do it yourself.
-              </p>
+      <p className="subtitle is-family-secondary">
+        Here you can either wait for your teammembers to create a request for
+        votes, or you can do it yourself.
+      </p>
 
-              <button
-                className="button is-primary is-family-primary"
-                onClick={() => setIsCreating(true)}
-              >
-                Create a request for votes
-              </button>
-            </div>
-          </section>
-        </div>
-      </div>
-    </BaseLayout>
+      <button
+        className="button is-primary is-family-primary"
+        onClick={() => setIsCreating(true)}
+      >
+        Create a request for votes
+      </button>
+    </PageLayout>
   )
 }

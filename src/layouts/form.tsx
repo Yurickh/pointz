@@ -1,5 +1,5 @@
 import React from 'react'
-import { BaseLayout } from './base'
+import { PageLayout } from './page'
 
 type FormLayoutProps = {
   title: string
@@ -14,22 +14,12 @@ export const FormLayout: React.FunctionComponent<FormLayoutProps> = ({
   grouped,
   children,
 }) => (
-  <BaseLayout>
-    <div className="columns">
-      <div className="column is-half is-offset-one-quarter">
-        <section className="section">
-          <div className="container">
-            <h1 className="title">{title}</h1>
-
-            <form
-              className={`field ${grouped ? 'is-grouped' : ''}`}
-              onSubmit={onSubmit}
-            >
-              {children}
-            </form>
-          </div>
-        </section>
-      </div>
-    </div>
-  </BaseLayout>
+  <PageLayout title={title}>
+    <form
+      className={`field ${grouped ? 'is-grouped' : ''}`}
+      onSubmit={onSubmit}
+    >
+      {children}
+    </form>
+  </PageLayout>
 )
