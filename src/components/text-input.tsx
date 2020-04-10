@@ -29,7 +29,7 @@ export const TextInput: React.FunctionComponent<TextInputProps> = ({
       id={id}
       name={id}
       placeholder={placeholder}
-      value={value}
+      value={value || ''}
       onChange={(event) => onChange(event.currentTarget.value)}
     />
     {error && <p className="help is-danger is-family-secondary">{error}</p>}

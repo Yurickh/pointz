@@ -2,6 +2,18 @@ import React from 'react'
 import firebase from './firebase'
 import { getUserName } from './user'
 
+interface User {
+  alive: true
+  answer?: string
+}
+
+interface Room {
+  activeTicket?: string
+  users: {
+    [name: string]: User
+  }
+}
+
 export const joinRoom = (roomId: string) => {
   const username = getUserName()
 
@@ -53,4 +65,42 @@ export const useActiveTicket = (roomId: string) => {
     firebase.database().ref(`rooms/${roomId}/activeTicket`).set(newTicket)
 
   return [activeTicket, updateActiveTicket]
+}
+
+export const useRoomUsers = (roomId: string) => {
+  const usersRef = React.useMemo(
+    () => firebase.database().ref(`rooms/${roomId}/users`),
+    [roomId],
+  )
+
+  const [amountAnswers, setAmountAnswers] = React.useState(0)
+  const [totalAmount, setTotalAmount] = React.useState(0)
+
+  const giveAnswer = (answer: number | string) => {
+    usersRef.child(`${getUserName()}/answer`).set(answer.toString())
+  }
+
+  React.useEffect(() => {
+    const callback = usersRef.on('value', (snapshot) => {
+      const users = Object.values(snapshot.val())
+      setTotalAmount(users.length)
+      setAmountAnswers(
+        users.filter((user: User) => user.answer !== undefined).length,
+      )
+    })
+
+    return () => usersRef.off('value', callback)
+  }, [usersRef])
+
+  console.log({
+    amountAnswers,
+    totalAmount,
+    giveAnswer,
+  })
+
+  return {
+    amountAnswers,
+    totalAmount,
+    giveAnswer,
+  }
 }

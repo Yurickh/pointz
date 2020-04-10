@@ -7,10 +7,13 @@ import { joinRoom, leaveRoom, useActiveTicket } from '../utils/room'
 import { WaitingRoom } from './waiting-room'
 import { Vote } from './vote'
 
+const Results = () => null
+
 export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
   const username = getUserName()
   const [isLoading, setLoading] = React.useState(true)
   const [activeTicket] = useActiveTicket(roomId)
+  const [showResults, setShowResults] = React.useState(false)
 
   React.useEffect(() => {
     if (username === null) {
@@ -28,7 +31,13 @@ export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
     return <BaseLayout> </BaseLayout>
   }
 
-  const Content = activeTicket ? Vote : WaitingRoom
+  if (!activeTicket) {
+    return <WaitingRoom roomId={roomId} />
+  }
 
-  return <Content roomId={roomId} />
+  if (showResults) {
+    return <Results />
+  }
+
+  return <Vote roomId={roomId} onDone={() => setShowResults(true)} />
 }
