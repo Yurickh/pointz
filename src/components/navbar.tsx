@@ -4,7 +4,7 @@ import { Link } from 'gatsby'
 
 export const Navbar = () => (
   <nav className="navbar" role="navigation" aria-label="main navigation">
-    <div className="navbar-brand">
+    <div className="navbar-brand" style={{ marginLeft: 27 }}>
       <Link className="navbar-item" to="/">
         <Brand />
       </Link>
