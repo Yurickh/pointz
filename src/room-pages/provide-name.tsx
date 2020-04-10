@@ -46,7 +46,7 @@ export const ProvideName: React.FunctionComponent<ProvideNameProps> = ({
       />
       <SubmitButton
         onClick={handleSubmit}
-        label="Create"
+        label={getUserName() ? 'Update' : 'Create'}
         disabled={name.length === 0}
       />
     </FormLayout>

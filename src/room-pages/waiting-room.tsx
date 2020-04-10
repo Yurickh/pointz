@@ -15,7 +15,7 @@ const ProvideTicket = ({ roomId, onCancel, onSuccess }) => {
   const handleCreationOfTicket = (event) => {
     event.preventDefault()
 
-    onSuccess(event.currentTarget.value)
+    onSuccess(ticketName)
   }
 
   return (

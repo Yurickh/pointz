@@ -6,11 +6,11 @@ import { getUserName } from '../utils/user'
 export const Navbar = () => (
   <nav
     className="navbar is-family-primary"
-    role="navigation"
-    aria-label="main navigation"
+    role="menubar"
+    aria-label="Pointz navigation"
   >
     <div className="navbar-brand" style={{ marginLeft: 27 }}>
-      <Link className="navbar-item" to="/">
+      <Link role="menuitem" aria-label="Go home" className="navbar-item" to="/">
         <Brand />
       </Link>
     </div>
@@ -19,12 +19,16 @@ export const Navbar = () => (
       <div className="navbar-item">
         <div className="buttons are-small">
           {getUserName() && (
-            <Link className="button is-secondary" to="/update-name">
+            <Link
+              role="menuitem"
+              className="button is-secondary"
+              to="/update-name"
+            >
               Update name
             </Link>
           )}
 
-          <Link className="button is-primary" to="/">
+          <Link role="menuitem" className="button is-primary" to="/">
             <strong>Create a room</strong>
           </Link>
         </div>
