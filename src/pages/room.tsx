@@ -1,16 +1,15 @@
 import React from 'react'
-import { Router, RouteComponentProps } from '@reach/router'
-import { ProvideTicket } from '../room-pages/provide-ticket'
+import { Router } from '@reach/router'
+import { Room } from '../room-pages/room'
 import { ProvideName } from '../room-pages/provide-name'
+import NotFoundPage from './404'
 
-const Vote = (_p: RouteComponentProps) => <>Vote</>
-
-const Room = () => (
+const RoomRouter = () => (
   <Router basepath="/room">
     <ProvideName path="/:roomId/name" />
-    <Vote path="/:roomId/vote" />
-    <ProvideTicket path="/:roomId" />
+    <Room path="/:roomId" />
+    <NotFoundPage default />
   </Router>
 )
 
-export default Room
+export default RoomRouter

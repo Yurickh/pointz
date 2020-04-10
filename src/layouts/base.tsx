@@ -1,13 +1,13 @@
 import React from 'react'
 
 import 'bulma/css/bulma.min.css'
-import './layout.css'
+import './reset.css'
 
-import { Navbar } from './navbar'
+import { Navbar } from '../components/navbar'
 
 const Yurick = () => <a href="https://github.com/Yurickh">Yurick</a>
 
-export const Layout = ({ children }) => (
+export const BaseLayout = ({ children }) => (
   <>
     <Navbar />
     <main>{children}</main>

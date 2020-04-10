@@ -1,3 +1,4 @@
+import React from 'react'
 import firebase from './firebase'
 import { getUserName } from './user'
 
@@ -18,4 +19,23 @@ export const leaveRoom = (roomId: string) => {
   if (username === null) return
 
   return firebase.database().ref(`rooms/${roomId}/users/${username}`).remove()
+}
+
+export const useActiveTicket = (roomId: string) => {
+  const [activeTicket, setActiveTicket] = React.useState(null)
+
+  React.useEffect(() => {
+    const ticketRef = firebase.database().ref(`rooms/${roomId}/activeTicket`)
+
+    const callback = ticketRef.on('value', (ticket) => setActiveTicket(ticket))
+
+    return () => {
+      ticketRef.off('value', callback)
+    }
+  }, [roomId])
+
+  const updateActiveTicket = (newTicket: string) =>
+    firebase.database().ref(`rooms/${roomId}/activeTicket`).set(newTicket)
+
+  return [activeTicket, updateActiveTicket]
 }
