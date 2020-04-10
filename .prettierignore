@@ -1,4 +1,9 @@
+node_modules
+dist
+lib
+static
+.docz
+.next
 .cache
-package.json
-package-lock.json
-public
+coverage
+build
