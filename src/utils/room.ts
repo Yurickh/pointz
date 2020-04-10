@@ -13,12 +13,25 @@ export const joinRoom = (roomId: string) => {
     .set(true)
 }
 
-export const leaveRoom = (roomId: string) => {
+export const leaveRoom = async (roomId: string) => {
   const username = getUserName()
 
   if (username === null) return
 
-  return firebase.database().ref(`rooms/${roomId}/users/${username}`).remove()
+  await firebase.database().ref(`rooms/${roomId}/users/${username}`).remove()
+
+  firebase
+    .database()
+    .ref(`rooms/${roomId}`)
+    .transaction((room) => {
+      if (room) {
+        // Delete the room if we're the only ones left
+        if (!room.users) {
+          return null
+        }
+      }
+      return room
+    })
 }
 
 export const useActiveTicket = (roomId: string) => {
