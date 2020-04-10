@@ -22,7 +22,7 @@ const ProvideTicket = ({ roomId, onCancel, onSuccess }) => {
     <FormLayout title="Create a ticket" onSubmit={handleCreationOfTicket}>
       <SEO title={`Creating ticket | ${toRoomName(roomId)}`} />
       <TextInput
-        id="ticketName"
+        id="ticket"
         label="Name or link to a ticket"
         help="This might help your teammates think better about the problem you've got at hand"
         value={ticketName}

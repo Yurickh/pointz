@@ -1,16 +1,18 @@
 import React from 'react'
-import { navigate } from 'gatsby'
-import { RouteComponentProps } from '@reach/router'
 import { FormLayout } from '../layouts/form'
 import { SEO } from '../components/seo'
-import { setUsername } from '../utils/user'
+import { setUsername, getUserName } from '../utils/user'
 import { TextInput } from '../components/text-input'
 import { SubmitButton } from '../components/submit-button'
 
-export const ProvideName = ({
-  roomId,
-}: RouteComponentProps<{ roomId: string }>) => {
-  const [name, setName] = React.useState('')
+type ProvideNameProps = {
+  onSuccess: () => void
+}
+
+export const ProvideName: React.FunctionComponent<ProvideNameProps> = ({
+  onSuccess,
+}) => {
+  const [name, setName] = React.useState(getUserName() || '')
   const [error, setError] = React.useState(false)
 
   const handleChange = (newValue) => {
@@ -23,7 +25,7 @@ export const ProvideName = ({
 
     if (name) {
       setUsername(name)
-      navigate(`/room/${roomId}`)
+      onSuccess()
     } else {
       setError(true)
     }

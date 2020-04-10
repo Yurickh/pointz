@@ -27,6 +27,7 @@ export const TextInput: React.FunctionComponent<TextInputProps> = ({
       className={`input ${error ? 'is-danger' : ''}`}
       type="text"
       id={id}
+      name={id}
       placeholder={placeholder}
       value={value}
       onChange={(event) => onChange(event.currentTarget.value)}
