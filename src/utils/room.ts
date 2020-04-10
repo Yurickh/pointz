@@ -27,7 +27,9 @@ export const useActiveTicket = (roomId: string) => {
   React.useEffect(() => {
     const ticketRef = firebase.database().ref(`rooms/${roomId}/activeTicket`)
 
-    const callback = ticketRef.on('value', (ticket) => setActiveTicket(ticket))
+    const callback = ticketRef.on('value', (snapshot) =>
+      setActiveTicket(snapshot.val()),
+    )
 
     return () => {
       ticketRef.off('value', callback)
