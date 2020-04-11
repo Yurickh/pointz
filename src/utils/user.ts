@@ -1,4 +1,14 @@
-export const setUsername = (username: string) =>
-  window.localStorage.setItem('username', username)
+const serverSideWindow = {
+  localStorage: {
+    getItem: () => null,
+    setItem: () => null,
+  },
+}
 
-export const getUserName = () => window.localStorage.getItem('username')
+const { localStorage } =
+  typeof window === 'undefined' ? serverSideWindow : window
+
+export const setUsername = (username: string) =>
+  localStorage.setItem('username', username)
+
+export const getUserName = () => localStorage.getItem('username')
