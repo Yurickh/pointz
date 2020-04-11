@@ -1,6 +1,5 @@
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
-import { navigate } from 'gatsby'
 import { FormLayout } from '../layouts/form'
 import { SEO } from '../components/seo'
 import { TextInput } from '../components/text-input'
@@ -44,14 +43,8 @@ const ProvideTicket = ({ roomId, onCancel, onSuccess }) => {
 export const WaitingRoom = ({
   roomId,
 }: RouteComponentProps<{ roomId: string }>) => {
-  const [activeTicket, setActiveTicket] = useActiveTicket(roomId)
+  const [, setActiveTicket] = useActiveTicket(roomId)
   const [isCreating, setIsCreating] = React.useState(false)
-
-  React.useEffect(() => {
-    if (activeTicket) {
-      navigate(`/rooms/${roomId}/vote`, { replace: true })
-    }
-  }, [activeTicket, roomId])
 
   if (isCreating) {
     return (

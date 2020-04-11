@@ -7,6 +7,7 @@ import { useRoomResults } from '../utils/room'
 type ResultsProps = {
   roomId: string
   activeTicket: string
+  goBack: () => void
 }
 
 const BackNumber = ({ children }: { children: string | number }) => (
@@ -30,12 +31,13 @@ const byEstimative = (
   if (est1 === 'Too much') return -1
   if (est2 === 'Too much') return 1
 
-  return parseInt(est1) - parseInt(est2)
+  return parseInt(est2) - parseInt(est1)
 }
 
 export const Results: React.FunctionComponent<ResultsProps> = ({
   roomId,
   activeTicket,
+  goBack,
 }) => {
   const results = useRoomResults(roomId)
   const votes = Object.values(results)
@@ -114,6 +116,10 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
           </table>
         </div>
       )}
+
+      <button className="button is-secondary" onClick={goBack}>
+        Go back to room
+      </button>
     </PageLayout>
   )
 }

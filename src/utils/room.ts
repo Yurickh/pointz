@@ -6,6 +6,7 @@ import { getUserName } from './user'
 interface User {
   alive: true
   answer?: string
+  done?: boolean
 }
 
 interface Room {
@@ -47,8 +48,10 @@ export const leaveRoom = async (roomId: string) => {
     })
 }
 
-export const useActiveTicket = (roomId: string) => {
-  const [activeTicket, setActiveTicket] = React.useState(null)
+export const useActiveTicket = (
+  roomId: string,
+): [string, (newTicket: string) => Promise<void>] => {
+  const [activeTicket, setActiveTicket] = React.useState(null as null | string)
 
   React.useEffect(() => {
     const ticketRef = firebase.database().ref(`rooms/${roomId}/activeTicket`)
@@ -63,7 +66,20 @@ export const useActiveTicket = (roomId: string) => {
   }, [roomId])
 
   const updateActiveTicket = (newTicket: string) =>
-    firebase.database().ref(`rooms/${roomId}/activeTicket`).set(newTicket)
+    firebase
+      .database()
+      .ref(`rooms/${roomId}`)
+      .transaction((room: Room) => {
+        if (room) {
+          room.activeTicket = newTicket
+
+          for (const user of Object.values(room.users)) {
+            delete user.done
+            delete user.answer
+          }
+        }
+        return room
+      })
 
   return [activeTicket, updateActiveTicket]
 }
@@ -120,4 +136,29 @@ export const useRoomResults = (roomId: string) => {
   }, [usersRef])
 
   return results
+}
+
+export const useUserIsDone = (
+  roomId: string,
+): [boolean, (done: boolean) => Promise<void>] => {
+  const doneRef = React.useMemo(
+    () =>
+      firebase.database().ref(`rooms/${roomId}/users/${getUserName()}/done`),
+    [roomId],
+  )
+  const [done, setDone] = React.useState(
+    undefined as undefined | null | boolean,
+  )
+
+  const makeDone = async (done: boolean) => {
+    await doneRef.set(done)
+    setDone(done)
+  }
+
+  React.useEffect(() => {
+    const callback = doneRef.on('value', (snapshot) => setDone(snapshot.val()))
+    return () => doneRef.off('value', callback)
+  })
+
+  return [done, makeDone]
 }
