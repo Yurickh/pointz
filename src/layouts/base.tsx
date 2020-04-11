@@ -11,7 +11,7 @@ export const BaseLayout = ({ children }) => (
   <>
     <Navbar />
     <main>{children}</main>
-    <footer style={{ padding: 40, position: 'absolute', bottom: 0 }}>
+    <footer style={{ padding: 40, position: 'fixed', bottom: 0, zIndex: -1 }}>
       © {new Date().getFullYear()}, Built with ♥️ by <Yurick />
     </footer>
   </>
