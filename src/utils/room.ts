@@ -1,4 +1,5 @@
 import React from 'react'
+import { mapObject } from '@gutenpress/helpers'
 import firebase from './firebase'
 import { getUserName } from './user'
 
@@ -92,15 +93,31 @@ export const useRoomUsers = (roomId: string) => {
     return () => usersRef.off('value', callback)
   }, [usersRef])
 
-  console.log({
-    amountAnswers,
-    totalAmount,
-    giveAnswer,
-  })
-
   return {
     amountAnswers,
     totalAmount,
     giveAnswer,
   }
+}
+
+export const useRoomResults = (roomId: string) => {
+  const usersRef = React.useMemo(
+    () => firebase.database().ref(`rooms/${roomId}/users`),
+    [roomId],
+  )
+
+  const [results, setResults] = React.useState({} as Record<string, string>)
+
+  React.useEffect(() => {
+    usersRef.once('value', (snapshot) => {
+      const votes = mapObject<any, Record<string, string>>(
+        ([key, value]) => [key as string, value.answer],
+        snapshot.val(),
+      )
+
+      setResults(votes)
+    })
+  }, [usersRef])
+
+  return results
 }

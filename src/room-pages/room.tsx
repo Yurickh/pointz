@@ -6,8 +6,7 @@ import { getUserName } from '../utils/user'
 import { joinRoom, leaveRoom, useActiveTicket } from '../utils/room'
 import { WaitingRoom } from './waiting-room'
 import { Vote } from './vote'
-
-const Results = () => null
+import { Results } from './results'
 
 export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
   const username = getUserName()
@@ -49,7 +48,7 @@ export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
   }
 
   if (showResults) {
-    return <Results />
+    return <Results roomId={roomId} activeTicket={activeTicket} />
   }
 
   return <Vote roomId={roomId} onDone={() => setShowResults(true)} />
