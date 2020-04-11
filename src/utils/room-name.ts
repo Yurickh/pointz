@@ -1,5 +1,5 @@
 export const toRoomId = (rawName: string) =>
-  rawName.toLowerCase().split(' ').join('-')
+  encodeURIComponent(rawName.toLowerCase()).replace(/%../g, '-')
 
 const capitalize = ([firstLetter, ...rest]: string) => {
   if (firstLetter === undefined) return ''
