@@ -18,15 +18,14 @@ export const Navbar = () => (
     <div className="navbar-end">
       <div className="navbar-item">
         <div className="buttons are-small">
-          {getUserName() && (
-            <Link
-              role="menuitem"
-              className="button is-secondary"
-              to="/update-name"
-            >
-              Update name
-            </Link>
-          )}
+          <Link
+            role="menuitem"
+            className="button is-secondary"
+            to="/update-name"
+            style={{ display: getUserName() ? 'inline-block' : 'none' }}
+          >
+            Update name
+          </Link>
 
           <Link role="menuitem" className="button is-primary" to="/">
             <strong>Create a room</strong>
