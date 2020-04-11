@@ -27,6 +27,19 @@ export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
     }
   }, [roomId, username])
 
+  React.useEffect(() => {
+    const onTabClose = () => leaveRoom(roomId)
+
+    window.addEventListener('beforeunload', onTabClose)
+
+    return () => {
+      // We need the timeout, or else it will remove the listener before closing the page
+      setTimeout(() => {
+        window.removeEventListener('beforeunload', onTabClose)
+      }, 0)
+    }
+  })
+
   if (isLoading) {
     return <BaseLayout> </BaseLayout>
   }
