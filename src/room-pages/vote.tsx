@@ -37,7 +37,7 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
       <Monospace>
         {amountAnswers}/{totalAmount}
       </Monospace>{' '}
-      people have given their estimatives
+      people have given their estimations
       <progress
         className="progress is-info"
         style={{ width: '100%' }}

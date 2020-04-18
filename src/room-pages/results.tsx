@@ -24,7 +24,7 @@ const BackNumber = ({ children }: { children: string | number }) => (
   </div>
 )
 
-const byEstimative = (
+const byEstimation = (
   [, est1]: [string, string],
   [, est2]: [string, string],
 ) => {
@@ -100,16 +100,16 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
             <thead>
               <tr>
                 <th>Teammember</th>
-                <th>Estimative</th>
+                <th>Estimation</th>
               </tr>
             </thead>
             <tbody>
               {Object.entries(results)
-                .sort(byEstimative)
-                .map(([username, estimative]) => (
+                .sort(byEstimation)
+                .map(([username, estimation]) => (
                   <tr key={username}>
                     <td>{username}</td>
-                    <td>{estimative}</td>
+                    <td>{estimation}</td>
                   </tr>
                 ))}
             </tbody>
