@@ -13,7 +13,12 @@ import { WaitingRoom } from './waiting-room'
 import { Vote } from './vote'
 import { Results } from './results'
 
-export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
+interface RoomProps {
+  roomId: string
+  uid: string
+}
+
+export const Room = ({ roomId, uid }: RoomProps) => {
   const username = getUserName()
   const [isLoading, setLoading] = React.useState(true)
   const [activeTicket] = useActiveTicket(roomId)
@@ -24,13 +29,13 @@ export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
     if (username === null) {
       navigate(`/room/${roomId}/name`, { replace: true })
     } else {
-      joinRoom(roomId).then(() => setLoading(false))
+      joinRoom(roomId, uid).then(() => setLoading(false))
     }
 
     return () => {
-      leaveRoom(roomId)
+      leaveRoom(roomId, uid)
     }
-  }, [roomId, username])
+  }, [roomId, uid, username])
 
   React.useEffect(() => {
     const onTabClose = () => leaveRoom(roomId)

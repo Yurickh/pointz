@@ -16,7 +16,7 @@ interface Room {
   }
 }
 
-export const joinRoom = (roomId: string) => {
+export const joinRoom = (roomId: string, _uid: string) => {
   const username = getUserName()
 
   if (username === null) throw new Error('You need a name to join a room')
@@ -27,7 +27,7 @@ export const joinRoom = (roomId: string) => {
     .set(true)
 }
 
-export const leaveRoom = async (roomId: string) => {
+export const leaveRoom = async (roomId: string, _uid: string) => {
   const username = getUserName()
 
   if (username === null) return
