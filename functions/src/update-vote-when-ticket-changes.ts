@@ -13,6 +13,8 @@ export const updateVoteWhenTicketChanges = functions.database
 
         room.vote.remaining = numOfUsers
         room.vote.total = numOfUsers
+
+        room.results = null
       }
       return room
     }),
