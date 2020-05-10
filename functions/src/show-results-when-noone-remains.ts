@@ -1,14 +1,10 @@
 import * as functions from 'firebase-functions'
-
-type User = {
-  name: string
-  vote?: string
-}
+import { User } from './types/user'
 
 export const showResultsWhenNooneRemains = functions.database
   .ref('/rooms/{roomId}/votes/remaining')
   .onUpdate((change, _context) => {
-    if (change.after.val() === 0) {
+    if (change.after.val() <= 0) {
       return change.after.ref.parent?.parent?.transaction((room) => {
         if (room) {
           room.results = {}

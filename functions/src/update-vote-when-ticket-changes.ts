@@ -1,18 +1,19 @@
 import * as functions from 'firebase-functions'
+import { User } from './types/user'
 
 export const updateVoteWhenTicketChanges = functions.database
   .ref('/rooms/{roomId}/activeTicket')
-  .onWrite((change, _context) =>
+  .onUpdate((change, _context) =>
     change.after.ref.parent?.transaction((room) => {
       if (room) {
-        for (const user of room.users) {
+        const users = Object.values<User>(room.users)
+
+        for (const user of users) {
           delete user.vote
         }
 
-        const numOfUsers = Object.keys(room.users).length
-
-        room.vote.remaining = numOfUsers
-        room.vote.total = numOfUsers
+        room.votes.remaining = users.length
+        room.votes.total = users.length
 
         room.results = null
       }
