@@ -29,29 +29,6 @@ export const joinRoom = (roomId: string, uid: string) => {
 export const leaveRoom = (roomId: string, uid: string) =>
   firebase.database().ref(`rooms/${roomId}/users/${uid}`).remove()
 
-export const useActiveTicket = (
-  roomId: string,
-): [string, (newTicket: string) => Promise<void>] => {
-  const [activeTicket, setActiveTicket] = React.useState(null as null | string)
-
-  React.useEffect(() => {
-    const ticketRef = firebase.database().ref(`rooms/${roomId}/activeTicket`)
-
-    const callback = ticketRef.on('value', (snapshot) =>
-      setActiveTicket(snapshot.val()),
-    )
-
-    return () => {
-      ticketRef.off('value', callback)
-    }
-  }, [roomId])
-
-  const updateActiveTicket = (newTicket: string) =>
-    firebase.database().ref(`rooms/${roomId}`).set(newTicket)
-
-  return [activeTicket, updateActiveTicket]
-}
-
 const useFirebaseValue = <Value>(ref: string, defaultValue: Value): Value => {
   const [value, setValue] = React.useState(defaultValue)
 
@@ -65,8 +42,25 @@ const useFirebaseValue = <Value>(ref: string, defaultValue: Value): Value => {
   return value
 }
 
+export const useActiveTicket = (
+  roomId: string,
+): [string, (newTicket: string) => Promise<void>] => {
+  const activeTicket = useFirebaseValue(
+    `rooms/${roomId}/activeTicket`,
+    null as string,
+  )
+
+  const updateActiveTicket = (newTicket: string) =>
+    firebase.database().ref(`rooms/${roomId}/activeTicket`).set(newTicket)
+
+  return [activeTicket, updateActiveTicket]
+}
+
 export const useVotes = (roomId: string) =>
-  useFirebaseValue(`rooms/${roomId}/votes`, { remaining: 0, total: 0 })
+  useFirebaseValue(`rooms/${roomId}/votes`, { remaining: 0, total: 0 }) || {
+    remaining: 0,
+    total: 0,
+  }
 
 export const vote = (roomId: string, uid: string, vote: string) =>
   firebase.database().ref(`rooms/${roomId}/users/${uid}/vote`).set(vote)

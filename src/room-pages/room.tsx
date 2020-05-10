@@ -2,7 +2,6 @@ import React from 'react'
 import { navigate } from 'gatsby'
 import { RouteComponentProps } from '@reach/router'
 import { BaseLayout } from '../layouts/base'
-import { getUserName } from '../utils/user'
 import {
   joinRoom,
   leaveRoom,
@@ -17,22 +16,22 @@ interface RoomProps extends RouteComponentProps<{ roomId: string }> {
 }
 
 export const Room = ({ roomId, uid }: RoomProps) => {
-  const username = getUserName()
   const [isLoading, setLoading] = React.useState(true)
   const [activeTicket, updateActiveTicketName] = useActiveTicket(roomId)
   const results = useRoomResults(roomId)
 
   React.useEffect(() => {
-    if (username === null) {
-      navigate(`/room/${roomId}/name`, { replace: true })
-    } else {
-      joinRoom(roomId, uid).then(() => setLoading(false))
-    }
+    if (!uid) return
 
-    return () => {
-      leaveRoom(roomId, uid)
+    try {
+      joinRoom(roomId, uid).then(() => setLoading(false))
+
+      return () => leaveRoom(roomId, uid)
+    } catch (error) {
+      // If joining a room fails, we're likely missing a username
+      navigate(`/room/${roomId}/name`, { replace: true })
     }
-  }, [roomId, uid, username])
+  }, [roomId, uid])
 
   React.useEffect(() => {
     const onTabClose = () => leaveRoom(roomId, uid)
@@ -47,12 +46,14 @@ export const Room = ({ roomId, uid }: RoomProps) => {
     }
   }, [roomId, uid])
 
-  const resetVoting = () =>
+  const resetVoting = () => {
+    setLoading(true)
     updateActiveTicketName(
       Math.floor(Math.random() * 1000)
         .toString()
         .padStart(4, '0'),
-    )
+    ).then(() => setLoading(false))
+  }
 
   if (isLoading) {
     return <BaseLayout> </BaseLayout>
@@ -69,5 +70,5 @@ export const Room = ({ roomId, uid }: RoomProps) => {
     )
   }
 
-  return <Vote roomId={roomId} uid={uid} />
+  return <Vote roomId={roomId} uid={uid} activeTicket={activeTicket} />
 }
