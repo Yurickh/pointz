@@ -2,12 +2,12 @@ import React from 'react'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
 import { toRoomName } from '../utils/room-name'
-import { useRoomResults } from '../utils/room'
 
 type ResultsProps = {
   roomId: string
   activeTicket: string
-  goBack: () => void
+  startVote: () => void
+  results: Record<string, string>
 }
 
 const BackNumber = ({ children }: { children: string | number }) => (
@@ -37,9 +37,9 @@ const byEstimation = (
 export const Results: React.FunctionComponent<ResultsProps> = ({
   roomId,
   activeTicket,
-  goBack,
+  startVote,
+  results,
 }) => {
-  const results = useRoomResults(roomId)
   const votes = Object.values(results)
   const points = votes
     .filter((vote) => vote !== 'Too much')
@@ -117,8 +117,8 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
         </div>
       )}
 
-      <button className="button is-secondary" onClick={goBack}>
-        Go back to room
+      <button className="button is-secondary" onClick={startVote}>
+        Start another vote round
       </button>
     </PageLayout>
   )

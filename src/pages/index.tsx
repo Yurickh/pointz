@@ -11,7 +11,7 @@ const CreateARoom = () => {
   const [name, setName] = useState('')
   const [error, setError] = useState(false)
 
-  const handleChange = (newValue) => {
+  const handleChange = (newValue: string) => {
     setName(newValue)
     setError(false)
   }

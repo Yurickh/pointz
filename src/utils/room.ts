@@ -1,5 +1,4 @@
 import React from 'react'
-import { mapObject } from '@gutenpress/helpers'
 import firebase from './firebase'
 import { getUserName } from './user'
 
@@ -16,37 +15,19 @@ interface Room {
   }
 }
 
-export const joinRoom = (roomId: string, _uid: string) => {
+export const joinRoom = (roomId: string, uid: string) => {
   const username = getUserName()
 
   if (username === null) throw new Error('You need a name to join a room')
 
   return firebase
     .database()
-    .ref(`rooms/${roomId}/users/${username}/alive`)
-    .set(true)
+    .ref(`rooms/${roomId}/users/${uid}/name`)
+    .set(username)
 }
 
-export const leaveRoom = async (roomId: string, _uid: string) => {
-  const username = getUserName()
-
-  if (username === null) return
-
-  await firebase.database().ref(`rooms/${roomId}/users/${username}`).remove()
-
-  firebase
-    .database()
-    .ref(`rooms/${roomId}`)
-    .transaction((room) => {
-      if (room) {
-        // Delete the room if we're the only ones left
-        if (!room.users) {
-          return null
-        }
-      }
-      return room
-    })
-}
+export const leaveRoom = (roomId: string, uid: string) =>
+  firebase.database().ref(`rooms/${roomId}/users/${uid}`).remove()
 
 export const useActiveTicket = (
   roomId: string,
@@ -66,77 +47,35 @@ export const useActiveTicket = (
   }, [roomId])
 
   const updateActiveTicket = (newTicket: string) =>
-    firebase
-      .database()
-      .ref(`rooms/${roomId}`)
-      .transaction((room: Room) => {
-        if (room) {
-          room.activeTicket = newTicket
-
-          for (const user of Object.values(room.users)) {
-            delete user.done
-            delete user.answer
-          }
-        }
-        return room
-      })
+    firebase.database().ref(`rooms/${roomId}`).set(newTicket)
 
   return [activeTicket, updateActiveTicket]
 }
 
-export const useRoomUsers = (roomId: string) => {
-  const usersRef = React.useMemo(
-    () => firebase.database().ref(`rooms/${roomId}/users`),
-    [roomId],
-  )
-
-  const [amountAnswers, setAmountAnswers] = React.useState(0)
-  const [totalAmount, setTotalAmount] = React.useState(0)
-
-  const giveAnswer = (answer: number | string) => {
-    usersRef.child(`${getUserName()}/answer`).set(answer.toString())
-  }
+const useFirebaseValue = <Value>(ref: string, defaultValue: Value): Value => {
+  const [value, setValue] = React.useState(defaultValue)
 
   React.useEffect(() => {
-    const callback = usersRef.on('value', (snapshot) => {
-      const users = Object.values(snapshot.val())
-      setTotalAmount(users.length)
-      setAmountAnswers(
-        users.filter((user: User) => user.answer !== undefined).length,
-      )
-    })
+    const dbRef = firebase.database().ref(ref)
+    const callback = dbRef.on('value', (snapshot) => setValue(snapshot.val()))
 
-    return () => usersRef.off('value', callback)
-  }, [usersRef])
+    return () => dbRef.off('value', callback)
+  }, [ref])
 
-  return {
-    amountAnswers,
-    totalAmount,
-    giveAnswer,
-  }
+  return value
 }
 
-export const useRoomResults = (roomId: string) => {
-  const usersRef = React.useMemo(
-    () => firebase.database().ref(`rooms/${roomId}/users`),
-    [roomId],
+export const useVotes = (roomId: string) =>
+  useFirebaseValue(`rooms/${roomId}/votes`, { remaining: 0, total: 0 })
+
+export const vote = (roomId: string, uid: string, vote: string) =>
+  firebase.database().ref(`rooms/${roomId}/users/${uid}/vote`).set(vote)
+
+export const useRoomResults = (roomId: string) =>
+  useFirebaseValue(
+    `rooms/${roomId}/results`,
+    null as Record<string, string> | null,
   )
-
-  const [results, setResults] = React.useState({} as Record<string, string>)
-
-  React.useEffect(() => {
-    usersRef.once('value', (snapshot) => {
-      const votes = mapObject<any, Record<string, string>>(
-        ([key, value]) => [key as string, value.answer],
-        snapshot.val(),
-      )
-
-      setResults(votes)
-    })
-  }, [usersRef])
-
-  return results
-}
 
 export const useUserIsDone = (
   roomId: string,

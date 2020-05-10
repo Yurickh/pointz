@@ -6,7 +6,7 @@ import { ProvideNameForRoom } from '../room-pages/provide-name-for-room'
 import { signIn } from '../utils/firebase'
 
 const RoomRouter = () => {
-  const [_uid, setUid] = useState('')
+  const [uid, setUid] = useState('')
 
   React.useEffect(() => {
     signIn().then((user) => {

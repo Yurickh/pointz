@@ -7,23 +7,20 @@ import {
   joinRoom,
   leaveRoom,
   useActiveTicket,
-  useUserIsDone,
+  useRoomResults,
 } from '../utils/room'
-import { WaitingRoom } from './waiting-room'
 import { Vote } from './vote'
 import { Results } from './results'
 
-interface RoomProps {
-  roomId: string
+interface RoomProps extends RouteComponentProps<{ roomId: string }> {
   uid: string
 }
 
 export const Room = ({ roomId, uid }: RoomProps) => {
   const username = getUserName()
   const [isLoading, setLoading] = React.useState(true)
-  const [activeTicket] = useActiveTicket(roomId)
-  const [done, setDone] = useUserIsDone(roomId)
-  const [showResults, setShowResults] = React.useState(false)
+  const [activeTicket, updateActiveTicketName] = useActiveTicket(roomId)
+  const results = useRoomResults(roomId)
 
   React.useEffect(() => {
     if (username === null) {
@@ -38,7 +35,7 @@ export const Room = ({ roomId, uid }: RoomProps) => {
   }, [roomId, uid, username])
 
   React.useEffect(() => {
-    const onTabClose = () => leaveRoom(roomId)
+    const onTabClose = () => leaveRoom(roomId, uid)
 
     window.addEventListener('beforeunload', onTabClose)
 
@@ -48,37 +45,29 @@ export const Room = ({ roomId, uid }: RoomProps) => {
         window.removeEventListener('beforeunload', onTabClose)
       }, 0)
     }
-  }, [roomId])
+  }, [roomId, uid])
 
-  // Go back to vote when active ticket is updated
-  React.useEffect(() => {
-    setShowResults(false)
-  }, [activeTicket])
+  const resetVoting = () =>
+    updateActiveTicketName(
+      Math.floor(Math.random() * 1000)
+        .toString()
+        .padStart(4, '0'),
+    )
 
-  if (isLoading || done === undefined) {
+  if (isLoading) {
     return <BaseLayout> </BaseLayout>
   }
 
-  if (!activeTicket) {
-    return <WaitingRoom roomId={roomId} />
-  }
-
-  if (showResults) {
+  if (results !== null) {
     return (
       <Results
         roomId={roomId}
         activeTicket={activeTicket}
-        goBack={async () => {
-          await setDone(true)
-          setShowResults(false)
-        }}
+        results={results}
+        startVote={resetVoting}
       />
     )
   }
 
-  if (done === true) {
-    return <WaitingRoom roomId={roomId} />
-  }
-
-  return <Vote roomId={roomId} onDone={() => setShowResults(true)} />
+  return <Vote roomId={roomId} uid={uid} />
 }
