@@ -37,3 +37,15 @@ yarn build
 ```
 
 and peek at the `public` folder.
+
+### Developing functions
+
+Pointz has some firebase functions setup for better handling of its store.
+
+These functions live under the `functions` folder:
+
+```bash
+cd functions
+yarn install
+yarn build
+```
