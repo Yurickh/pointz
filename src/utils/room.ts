@@ -42,6 +42,13 @@ const useFirebaseValue = <Value>(ref: string, defaultValue: Value): Value => {
   return value
 }
 
+export const useIsVoting = (roomId: string) =>
+  [
+    useFirebaseValue(`rooms/${roomId}/voting`, null as boolean),
+    (newIsVoting: boolean) =>
+      firebase.database().ref(`rooms/${roomId}/voting`).set(newIsVoting),
+  ] as const
+
 export const useActiveTicket = (
   roomId: string,
 ): [string, (newTicket: string) => Promise<void>] => {

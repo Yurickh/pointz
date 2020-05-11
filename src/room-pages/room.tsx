@@ -7,6 +7,7 @@ import {
   leaveRoom,
   useActiveTicket,
   useRoomResults,
+  useIsVoting,
 } from '../utils/room'
 import { Vote } from './vote'
 import { Results } from './results'
@@ -17,8 +18,9 @@ interface RoomProps extends RouteComponentProps<{ roomId: string }> {
 
 export const Room = ({ roomId, uid }: RoomProps) => {
   const [isLoading, setLoading] = React.useState(true)
-  const [activeTicket, updateActiveTicketName] = useActiveTicket(roomId)
+  const [activeTicket] = useActiveTicket(roomId)
   const results = useRoomResults(roomId)
+  const [isVoting, setIsVoting] = useIsVoting(roomId)
 
   React.useEffect(() => {
     if (!uid) return
@@ -48,27 +50,23 @@ export const Room = ({ roomId, uid }: RoomProps) => {
 
   const resetVoting = () => {
     setLoading(true)
-    updateActiveTicketName(
-      Math.floor(Math.random() * 1000)
-        .toString()
-        .padStart(4, '0'),
-    ).then(() => setLoading(false))
+    setIsVoting(true).then(() => setLoading(false))
   }
 
-  if (isLoading) {
+  if (isLoading || isVoting === null || (!isVoting && results === null)) {
     return <BaseLayout> </BaseLayout>
   }
 
-  if (results !== null) {
-    return (
-      <Results
-        roomId={roomId}
-        activeTicket={activeTicket}
-        results={results}
-        startVote={resetVoting}
-      />
-    )
+  if (isVoting) {
+    return <Vote roomId={roomId} uid={uid} activeTicket={activeTicket} />
   }
 
-  return <Vote roomId={roomId} uid={uid} activeTicket={activeTicket} />
+  return (
+    <Results
+      roomId={roomId}
+      activeTicket={activeTicket}
+      results={results}
+      startVote={resetVoting}
+    />
+  )
 }
