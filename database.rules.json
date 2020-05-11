@@ -10,6 +10,9 @@
           ".write": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()",
           ".validate": "newData.isString()"
         },
+        "voting": {
+          ".read": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()"
+        },
         "users": {
           "$uid": {
             ".read": "auth.uid === $uid",

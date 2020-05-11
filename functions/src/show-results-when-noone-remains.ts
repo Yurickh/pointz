@@ -8,6 +8,7 @@ export const showResultsWhenNooneRemains = functions.database
       return change.after.ref.parent?.parent?.transaction((room) => {
         if (room) {
           room.results = {}
+          room.voting = false
           for (const user of Object.values<User>(room.users)) {
             room.results[user.name] = user.vote
           }
