@@ -34,10 +34,12 @@ const byEstimation = (
   return parseInt(est2) - parseInt(est1)
 }
 
-export const Results: React.FunctionComponent<ResultsProps> = ({ roomId }) => {
+export const Results: React.FunctionComponent<ResultsProps> = ({
+  roomId = '',
+}) => {
   const results = useRoomResults(roomId)
 
-  const votes = Object.values(results)
+  const votes = Object.values(results || {})
   const points = votes
     .filter((vote) => vote !== 'Too much')
     .map((vote) => parseInt(vote))
@@ -47,10 +49,10 @@ export const Results: React.FunctionComponent<ResultsProps> = ({ roomId }) => {
     Math.min(...points) === Infinity ? 'Too much' : Math.min(...points)
 
   React.useEffect(() => {
-    if (votes.length === 0) {
+    if (results === null) {
       navigateToRoom(roomId)
     }
-  }, [roomId, votes])
+  }, [results, roomId, votes])
 
   return (
     <PageLayout title="Results">
@@ -65,12 +67,13 @@ export const Results: React.FunctionComponent<ResultsProps> = ({ roomId }) => {
 
                 <div className="content">
                   <ul>
-                    {Object.entries(results)
-                      .filter(([, value]) => value === highest.toString())
-                      .sort()
-                      .map(([username]) => (
-                        <li key={username}>{username}</li>
-                      ))}
+                    {results
+                      && Object.entries(results)
+                        .filter(([, value]) => value === highest.toString())
+                        .sort()
+                        .map(([username]) => (
+                          <li key={username}>{username}</li>
+                        ))}
                   </ul>
                 </div>
 
@@ -84,12 +87,13 @@ export const Results: React.FunctionComponent<ResultsProps> = ({ roomId }) => {
 
                 <div className="content">
                   <ul>
-                    {Object.entries(results)
-                      .filter(([, value]) => value === lowest.toString())
-                      .sort()
-                      .map(([username]) => (
-                        <li key={username}>{username}</li>
-                      ))}
+                    {results
+                      && Object.entries(results)
+                        .filter(([, value]) => value === lowest.toString())
+                        .sort()
+                        .map(([username]) => (
+                          <li key={username}>{username}</li>
+                        ))}
                   </ul>
                 </div>
 
@@ -106,14 +110,15 @@ export const Results: React.FunctionComponent<ResultsProps> = ({ roomId }) => {
               </tr>
             </thead>
             <tbody>
-              {Object.entries(results)
-                .sort(byEstimation)
-                .map(([username, estimation]) => (
-                  <tr key={username}>
-                    <td>{username}</td>
-                    <td>{estimation}</td>
-                  </tr>
-                ))}
+              {results
+                && Object.entries(results)
+                  .sort(byEstimation)
+                  .map(([username, estimation]) => (
+                    <tr key={username}>
+                      <td>{username}</td>
+                      <td>{estimation}</td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
@@ -124,13 +129,6 @@ export const Results: React.FunctionComponent<ResultsProps> = ({ roomId }) => {
         onClick={() => navigateToRoom(roomId)}
       >
         Go back to home
-      </button>
-
-      <button
-        className="button is-secondary"
-        onClick={() => navigateToRoom(roomId, 'vote')}
-      >
-        Start another vote round
       </button>
     </PageLayout>
   )
