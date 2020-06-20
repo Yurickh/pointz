@@ -1,15 +1,15 @@
 import React from 'react'
-import { navigate } from 'gatsby'
 import { RouteComponentProps } from '@reach/router'
 import {
   joinRoom,
   leaveRoom,
-  useActiveTicket,
-  useRoomResults,
-  useIsVoting,
+  // useActiveTicket,
+  // useRoomResults,
+  // useIsVoting,
 } from '../utils/room'
 import { WaitingRoom } from './waiting-room'
 import { Loading } from './loading'
+import { navigate } from 'gatsby'
 
 interface RoomProps extends RouteComponentProps<{ roomId: string }> {
   uid: string
@@ -17,9 +17,9 @@ interface RoomProps extends RouteComponentProps<{ roomId: string }> {
 
 export const Room = ({ roomId, uid }: RoomProps) => {
   const [isLoading, setLoading] = React.useState(true)
-  const [activeTicket] = useActiveTicket(roomId)
-  const results = useRoomResults(roomId)
-  const [isVoting, setIsVoting] = useIsVoting(roomId)
+  // const [activeTicket] = useActiveTicket(roomId)
+  // const results = useRoomResults(roomId)
+  // const [isVoting, setIsVoting] = useIsVoting(roomId)
 
   React.useEffect(() => {
     if (!uid) return
@@ -30,7 +30,7 @@ export const Room = ({ roomId, uid }: RoomProps) => {
       return () => leaveRoom(roomId, uid)
     } catch (error) {
       // If joining a room fails, we're likely missing a username
-      navigate(`/room/${roomId}/name`, { replace: true })
+      navigate('/update-name')
     }
   }, [roomId, uid])
 
@@ -47,10 +47,10 @@ export const Room = ({ roomId, uid }: RoomProps) => {
     }
   }, [roomId, uid])
 
-  const resetVoting = () => {
-    setLoading(true)
-    setIsVoting(true).then(() => setLoading(false))
-  }
+  // const resetVoting = () => {
+  //   setLoading(true)
+  //   setIsVoting(true).then(() => setLoading(false))
+  // }
 
   if (isLoading) {
     return <Loading />

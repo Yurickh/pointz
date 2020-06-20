@@ -1,6 +1,9 @@
 import React from 'react'
+import { navigate } from 'gatsby'
+import { NavigateOptions } from '@reach/router'
 import firebase from './firebase'
 import { getUserName } from './user'
+import { toRoomName } from './room-name'
 
 interface User {
   name: string
@@ -110,3 +113,11 @@ export const useUserIsDone = (
 
   return [done, makeDone]
 }
+
+type RoomSubRoute = '' | 'vote' | 'name' | 'results'
+
+export const navigateToRoom = <State extends any = {}>(
+  roomId: string,
+  subroute: RoomSubRoute = '',
+  options: NavigateOptions<State> = undefined,
+) => navigate(`/room/${toRoomName(roomId)}/${subroute}`, options)

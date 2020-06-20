@@ -1,8 +1,8 @@
 import React from 'react'
-import { navigate } from 'gatsby'
 import { SEO } from '../components/seo'
 import shortUUID from 'short-uuid'
 import { FormLayout } from '../layouts/form'
+import { navigateToRoom } from '../utils/room'
 
 const JoinRoom = () => {
   const [roomId, setRoomId] = React.useState('')
@@ -15,7 +15,7 @@ const JoinRoom = () => {
         event.preventDefault()
 
         if (roomId.length > 0) {
-          navigate(`/room/${roomId}`)
+          navigateToRoom(roomId)
         } else {
           setError("Room id can't be empty")
         }
