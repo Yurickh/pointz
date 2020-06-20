@@ -27,8 +27,6 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
   const [isVoting] = useIsVoting(roomId)
   const animatedAmount = useEase(total - remaining)
 
-  console.log({ remaining, total })
-
   React.useEffect(() => {
     // if isVoting is null, it means it's still being fetched
     if (isVoting === false) {

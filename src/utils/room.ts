@@ -4,6 +4,7 @@ import { NavigateOptions } from '@reach/router'
 import firebase from './firebase'
 import { getUserName } from './user'
 import { toRoomName } from './room-name'
+import { useSafeEffect } from './use-safe-effect'
 
 interface User {
   name: string
@@ -34,12 +35,14 @@ export const leaveRoom = (roomId: string, uid: string) =>
 const useFirebaseValue = <Value>(ref: string, defaultValue: Value): Value => {
   const [value, setValue] = React.useState(defaultValue)
 
-  React.useEffect(() => {
+  const syncValue = React.useCallback(() => {
     const dbRef = firebase.database().ref(ref)
     const callback = dbRef.on('value', (snapshot) => setValue(snapshot.val()))
 
     return () => dbRef.off('value', callback)
   }, [ref])
+
+  useSafeEffect(syncValue)
 
   return value
 }

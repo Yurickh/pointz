@@ -54,7 +54,7 @@ const RoomRouter = ({ location }: RouteComponentProps<{}>) => {
     <Router basepath="/room">
       <Results path="/:roomId/results" />
       <Vote uid={uid} path="/:roomId/vote" />
-      <Room uid={uid} path="/:roomId" />
+      <Room path="/:roomId" />
       <NotFound default />
     </Router>
   )
