@@ -2,14 +2,6 @@
   "rules": {
     "rooms": {
       "$roomId": {
-        "votes": {
-          ".read": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()"
-        },
-        "activeTicket": {
-          ".read": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()",
-          ".write": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()",
-          ".validate": "newData.isString()"
-        },
         "voting": {
           ".read": true,
           ".write": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()"
