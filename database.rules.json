@@ -15,8 +15,10 @@
           ".write": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()"
         },
         "users": {
-          ".read": true,
-          ".write": true
+          "$uid": {
+            ".read": true,
+            ".write": "auth.uid === $uid"
+          }
         },
         "results": {
           ".read": true
