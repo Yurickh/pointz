@@ -11,16 +11,15 @@
           ".validate": "newData.isString()"
         },
         "voting": {
-          ".read": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()"
+          ".read": true,
+          ".write": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()"
         },
         "users": {
-          "$uid": {
-            ".read": "auth.uid === $uid",
-            ".write": "auth.uid === $uid"
-          }
+          ".read": true,
+          ".write": true
         },
         "results": {
-          ".read": "auth.uid !== null && data.parent().child('users').child(auth.uid).exists()"
+          ".read": true
         }
       }
     }
