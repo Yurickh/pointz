@@ -8,14 +8,16 @@ export const handleVotingStatusChange = functions.database
       if (room) {
         if (change.after.val() === true) {
           // if we started a new voting, clean up previous vote results
-          room.results = null
+          room.results = false
         } else {
-          // if we ended the previous voting, populate results
           room.results = {}
 
+          // if we ended the previous voting, populate results
           for (const user of Object.values<User>(room.users)) {
-            room.results[user.name] = user.vote
-            delete user.vote
+            if (user.vote) {
+              room.results[user.name] = user.vote
+              delete user.vote
+            }
           }
         }
       }
