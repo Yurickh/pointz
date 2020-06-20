@@ -3,12 +3,13 @@ import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
 import { useVotes, vote } from '../utils/room'
 import { useEase } from '../utils/use-ease'
+import { RouteComponentProps } from '@reach/router'
 
-type VoteProps = {
+type VoteProps = RouteComponentProps<{
   roomId: string
   uid: string
   activeTicket: string
-}
+}>
 
 const Monospace = ({ children }: { children: ReactNode }) => (
   <span className="is-family-monospace">{children}</span>
@@ -16,12 +17,19 @@ const Monospace = ({ children }: { children: ReactNode }) => (
 
 export const Vote: React.FunctionComponent<VoteProps> = ({
   roomId,
+  location,
   uid,
   activeTicket,
 }) => {
+  const { timeout } = location.state as { timeout?: string }
   const [selected, setSelected] = React.useState(undefined)
   const { remaining, total } = useVotes(roomId)
   const animatedAmount = useEase(total - remaining)
+
+  React.useEffect(() => {
+    // TODO: navigate to results when done
+    console.log(timeout)
+  })
 
   return (
     <PageLayout title="Choose a point amount">

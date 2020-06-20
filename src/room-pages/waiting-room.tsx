@@ -1,69 +1,33 @@
 import React from 'react'
+import { navigate } from 'gatsby'
 import { RouteComponentProps } from '@reach/router'
-import { FormLayout } from '../layouts/form'
 import { SEO } from '../components/seo'
-import { TextInput } from '../components/text-input'
-import { SubmitButton } from '../components/submit-button'
 import { toRoomName } from '../utils/room-name'
-import { useActiveTicket } from '../utils/room'
 import { PageLayout } from '../layouts/page'
-
-const ProvideTicket = ({ roomId, onCancel, onSuccess }) => {
-  const [ticketName, setTicketName] = React.useState('')
-
-  const handleCreationOfTicket = (event) => {
-    event.preventDefault()
-
-    onSuccess(ticketName)
-  }
-
-  return (
-    <FormLayout title="Create a ticket" onSubmit={handleCreationOfTicket}>
-      <SEO title={`Creating ticket | ${toRoomName(roomId)}`} />
-      <TextInput
-        id="ticket"
-        label="Name or link to a ticket"
-        help="This might help your teammates think better about the problem you've got at hand"
-        value={ticketName}
-        onChange={setTicketName}
-      />
-      <div className="field is-grouped">
-        <SubmitButton label="Create" onClick={handleCreationOfTicket} />
-        <button
-          className="button is-secondary is-family-primary"
-          onClick={onCancel}
-        >
-          Cancel
-        </button>
-      </div>
-    </FormLayout>
-  )
-}
+import { useUserNames } from '../utils/room'
 
 export const WaitingRoom = ({
   roomId,
 }: RouteComponentProps<{ roomId: string }>) => {
-  const [, setActiveTicket] = useActiveTicket(roomId)
-  const [isCreating, setIsCreating] = React.useState(false)
   const link = React.useRef(null)
+  const users = useUserNames(roomId)
   const [copiedVisible, setCopiedVisible] = React.useState(false)
 
-  if (isCreating) {
-    return (
-      <ProvideTicket
-        roomId={roomId}
-        onCancel={() => setIsCreating(false)}
-        onSuccess={setActiveTicket}
-      />
-    )
+  const startVote = () => {
+    // TODO: start vote in database
+    navigate(`/room/${roomId}/vote`)
+  }
+
+  const startVoteWithTimeout = () => {
+    // TODO: start vote in database
+    navigate(`/room/${roomId}/vote`, { state: { timeout: 5 } })
   }
 
   return (
     <PageLayout
       title={
         <>
-          Welcome to the{' '}
-          <span className="has-text-primary">{toRoomName(roomId)}</span> room!
+          Welcome to <span className="has-text-primary">☝️ Pointz</span>!
         </>
       }
     >
@@ -72,8 +36,37 @@ export const WaitingRoom = ({
         Here you can either wait for your teammembers to create a request for
         votes, or you can do it yourself.
       </p>
-      <p className="subtitle is-family-secondary">
-        Feel free to invite them here by sharing the link:
+
+      <div className="field is-grouped">
+        <p className="control">
+          <button
+            className="button is-primary is-family-primary"
+            onClick={startVote}
+          >
+            Start voting
+          </button>
+        </p>
+        <p className="control">
+          <button
+            className="button is-secondary is-family-primary"
+            onClick={startVoteWithTimeout}
+          >
+            Start voting with timeout
+          </button>
+        </p>
+      </div>
+
+      <div className="content is-family-primary">
+        <h3>Current teammembers in this room:</h3>
+        <ul>
+          {users.map((userName) => (
+            <li key={userName}>{userName}</li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="content is-family-secondary">
+        You can invite more by sharing the link:
       </p>
 
       <div className="field has-addons">
@@ -81,7 +74,7 @@ export const WaitingRoom = ({
           <input
             className="input is-family-primary"
             readOnly
-            value={`https://pointz.yurick.dev/room/${roomId}`}
+            value={window.location.href}
             ref={link}
           />
         </div>
@@ -113,13 +106,6 @@ export const WaitingRoom = ({
           </button>
         </div>
       </div>
-
-      <button
-        className="button is-primary is-family-primary"
-        onClick={() => setIsCreating(true)}
-      >
-        Create a ticket for voting
-      </button>
     </PageLayout>
   )
 }

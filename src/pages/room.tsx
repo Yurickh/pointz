@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { Router } from '@reach/router'
 import { Room } from '../room-pages/room'
-import { Loading } from '../room-pages/loading'
-import { ProvideNameForRoom } from '../room-pages/provide-name-for-room'
 import { signIn } from '../utils/firebase'
+import { Loading } from '../room-pages/loading'
+import { Results } from '../room-pages/results'
+import { ProvideName } from '../room-pages/provide-name'
 
 const RoomRouter = () => {
   const [uid, setUid] = useState('')
@@ -16,7 +17,8 @@ const RoomRouter = () => {
 
   return (
     <Router basepath="/room">
-      <ProvideNameForRoom path="/:roomId/name" />
+      <ProvideName path="/:roomId/name" />
+      <Results path="/:roomId/results" />
       <Room uid={uid} path="/:roomId" />
       <Loading default />
     </Router>

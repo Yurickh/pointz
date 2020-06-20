@@ -1,14 +1,16 @@
 import React from 'react'
+import { navigate } from 'gatsby'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
 import { toRoomName } from '../utils/room-name'
+import { useActiveTicket } from '../utils/room'
+import { RouteComponentProps } from '@reach/router'
 
-type ResultsProps = {
+type ResultsProps = RouteComponentProps<{
   roomId: string
-  activeTicket: string
   startVote: () => void
   results: Record<string, string>
-}
+}>
 
 const BackNumber = ({ children }: { children: string | number }) => (
   <div
@@ -36,10 +38,13 @@ const byEstimation = (
 
 export const Results: React.FunctionComponent<ResultsProps> = ({
   roomId,
-  activeTicket,
-  startVote,
   results,
 }) => {
+  const [activeTicket] = useActiveTicket(roomId)
+  const startVote = () => {
+    navigate(`/room/${roomId}/vote`)
+  }
+
   const votes = Object.values(results)
   const points = votes
     .filter((vote) => vote !== 'Too much')
@@ -117,7 +122,17 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
         </div>
       )}
 
-      <button className="button is-secondary" onClick={startVote}>
+      <button
+        className="button is-primary"
+        onClick={() => navigate(`/room/${roomId}`)}
+      >
+        Go back to home
+      </button>
+
+      <button
+        className="button is-secondary"
+        onClick={() => navigate(`/room/${roomId}/vote`)}
+      >
         Start another vote round
       </button>
     </PageLayout>

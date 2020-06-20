@@ -1,7 +1,6 @@
 import React from 'react'
 import { navigate } from 'gatsby'
 import { RouteComponentProps } from '@reach/router'
-import { BaseLayout } from '../layouts/base'
 import {
   joinRoom,
   leaveRoom,
@@ -9,8 +8,8 @@ import {
   useRoomResults,
   useIsVoting,
 } from '../utils/room'
-import { Vote } from './vote'
-import { Results } from './results'
+import { WaitingRoom } from './waiting-room'
+import { Loading } from './loading'
 
 interface RoomProps extends RouteComponentProps<{ roomId: string }> {
   uid: string
@@ -53,20 +52,13 @@ export const Room = ({ roomId, uid }: RoomProps) => {
     setIsVoting(true).then(() => setLoading(false))
   }
 
-  if (isLoading || isVoting === null || (!isVoting && results === null)) {
-    return <BaseLayout> </BaseLayout>
+  if (isLoading) {
+    return <Loading />
   }
 
-  if (isVoting) {
-    return <Vote roomId={roomId} uid={uid} activeTicket={activeTicket} />
-  }
+  // if (isVoting) {
+  //   return <Vote roomId={roomId} uid={uid} activeTicket={activeTicket} />
+  // }
 
-  return (
-    <Results
-      roomId={roomId}
-      activeTicket={activeTicket}
-      results={results}
-      startVote={resetVoting}
-    />
-  )
+  return <WaitingRoom roomId={roomId} />
 }

@@ -3,9 +3,8 @@ import firebase from './firebase'
 import { getUserName } from './user'
 
 interface User {
-  alive: true
-  answer?: string
-  done?: boolean
+  name: string
+  vote?: string
 }
 
 interface Room {
@@ -77,6 +76,15 @@ export const useRoomResults = (roomId: string) =>
     `rooms/${roomId}/results`,
     null as Record<string, string> | null,
   )
+
+export const useUserNames = (roomId: string) => {
+  const users = useFirebaseValue(
+    `rooms/${roomId}/users`,
+    {} as Record<string, User>,
+  )
+
+  return Object.values(users).map((user) => user.name)
+}
 
 export const useUserIsDone = (
   roomId: string,

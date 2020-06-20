@@ -4,13 +4,15 @@ import { SEO } from '../components/seo'
 import { setUsername, getUserName } from '../utils/user'
 import { TextInput } from '../components/text-input'
 import { SubmitButton } from '../components/submit-button'
+import { RouteComponentProps } from '@reach/router'
+import { navigate } from 'gatsby'
 
-type ProvideNameProps = {
-  onSuccess: () => void
-}
+type ProvideNameProps = RouteComponentProps<{
+  roomId: string
+}>
 
 export const ProvideName: React.FunctionComponent<ProvideNameProps> = ({
-  onSuccess,
+  roomId,
 }) => {
   const [name, setName] = React.useState(getUserName() || '')
   const [error, setError] = React.useState(false)
@@ -25,7 +27,7 @@ export const ProvideName: React.FunctionComponent<ProvideNameProps> = ({
 
     if (name) {
       setUsername(name)
-      onSuccess()
+      navigate(`/room/${roomId}`)
     } else {
       setError(true)
     }
