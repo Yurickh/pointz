@@ -2,14 +2,12 @@ import React from 'react'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
 import { toRoomName } from '../utils/room-name'
-import { useActiveTicket } from '../utils/room'
+import { useRoomResults } from '../utils/room'
 import { RouteComponentProps } from '@reach/router'
 import { navigateToRoom } from '../utils/room'
 
 type ResultsProps = RouteComponentProps<{
   roomId: string
-  startVote: () => void
-  results: Record<string, string>
 }>
 
 const BackNumber = ({ children }: { children: string | number }) => (
@@ -36,11 +34,8 @@ const byEstimation = (
   return parseInt(est2) - parseInt(est1)
 }
 
-export const Results: React.FunctionComponent<ResultsProps> = ({
-  roomId,
-  results,
-}) => {
-  const [activeTicket] = useActiveTicket(roomId)
+export const Results: React.FunctionComponent<ResultsProps> = ({ roomId }) => {
+  const results = useRoomResults(roomId)
 
   const votes = Object.values(results)
   const points = votes
@@ -51,10 +46,15 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
   const lowest =
     Math.min(...points) === Infinity ? 'Too much' : Math.min(...points)
 
+  React.useEffect(() => {
+    if (votes.length === 0) {
+      navigateToRoom(roomId)
+    }
+  }, [roomId, votes])
+
   return (
     <PageLayout title="Results">
       <SEO title={`Results | ${toRoomName(roomId)}`} />
-      <p className="subtitle">{activeTicket}</p>
 
       {votes.length > 0 && (
         <div className="column">

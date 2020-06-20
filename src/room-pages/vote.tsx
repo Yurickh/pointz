@@ -1,14 +1,15 @@
 import React, { ReactNode } from 'react'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
-import { useVotes, vote } from '../utils/room'
+import { useVotes, vote, navigateToRoom, useIsVoting } from '../utils/room'
 import { useEase } from '../utils/use-ease'
 import { RouteComponentProps } from '@reach/router'
+// import { useSafeEffect } from '../utils/use-safe-effect'
+import { Loading } from './loading'
 
 type VoteProps = RouteComponentProps<{
   roomId: string
   uid: string
-  activeTicket: string
 }>
 
 const Monospace = ({ children }: { children: ReactNode }) => (
@@ -17,24 +18,47 @@ const Monospace = ({ children }: { children: ReactNode }) => (
 
 export const Vote: React.FunctionComponent<VoteProps> = ({
   roomId,
-  location,
+  // location,
   uid,
-  activeTicket,
 }) => {
-  const { timeout } = location.state as { timeout?: string }
+  // const { timeout } = (location.state || {}) as { timeout?: string }
   const [selected, setSelected] = React.useState(undefined)
   const { remaining, total } = useVotes(roomId)
+  const [isVoting] = useIsVoting(roomId)
   const animatedAmount = useEase(total - remaining)
 
+  console.log({ remaining, total })
+
   React.useEffect(() => {
-    // TODO: navigate to results when done
-    console.log(timeout)
-  })
+    // if isVoting is null, it means it's still being fetched
+    if (isVoting === false) {
+      navigateToRoom(roomId)
+    }
+  }, [isVoting, roomId])
+
+  // COMBAK: add timeout once basic voting works
+  // const navigateWhenTimeout = React.useCallback(() => {
+  //   if (timeout !== undefined) {
+  //     const id = setTimeout(
+  //       () => navigateToRoom(roomId, 'results'),
+  //       parseInt(timeout),
+  //     )
+
+  //     return () => {
+  //       clearTimeout(id)
+  //     }
+  //   }
+  // }, [roomId, timeout])
+
+  // useSafeEffect(navigateWhenTimeout)
+
+  if (isVoting === null) {
+    return <Loading />
+  }
 
   return (
     <PageLayout title="Choose a point amount">
       <SEO title={`Vote | ${roomId}`} />
-      <p className="subtitle">{activeTicket}</p>
       <Monospace>
         {total - remaining}/{total}
       </Monospace>{' '}

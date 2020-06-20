@@ -51,25 +51,16 @@ export const useIsVoting = (roomId: string) =>
       firebase.database().ref(`rooms/${roomId}/voting`).set(newIsVoting),
   ] as const
 
-export const useActiveTicket = (
-  roomId: string,
-): [string, (newTicket: string) => Promise<void>] => {
-  const activeTicket = useFirebaseValue(
-    `rooms/${roomId}/activeTicket`,
-    null as string,
+export const useVotes = (roomId: string) => {
+  const users = Object.values(
+    useFirebaseValue(`rooms/${roomId}/users`, {} as Record<string, User>) || {},
   )
 
-  const updateActiveTicket = (newTicket: string) =>
-    firebase.database().ref(`rooms/${roomId}/activeTicket`).set(newTicket)
-
-  return [activeTicket, updateActiveTicket]
-}
-
-export const useVotes = (roomId: string) =>
-  useFirebaseValue(`rooms/${roomId}/votes`, { remaining: 0, total: 0 }) || {
-    remaining: 0,
-    total: 0,
+  return {
+    total: users.length,
+    remaining: users.filter((user) => !user.vote).length,
   }
+}
 
 export const vote = (roomId: string, uid: string, vote: string) =>
   firebase.database().ref(`rooms/${roomId}/users/${uid}/vote`).set(vote)
@@ -78,40 +69,13 @@ export const useRoomResults = (roomId: string) =>
   useFirebaseValue(
     `rooms/${roomId}/results`,
     null as Record<string, string> | null,
-  )
+  ) || {}
 
 export const useUserNames = (roomId: string) => {
-  const users = useFirebaseValue(
-    `rooms/${roomId}/users`,
-    {} as Record<string, User>,
-  )
+  const users =
+    useFirebaseValue(`rooms/${roomId}/users`, {} as Record<string, User>) || {}
 
   return Object.values(users).map((user) => user.name)
-}
-
-export const useUserIsDone = (
-  roomId: string,
-): [boolean, (done: boolean) => Promise<void>] => {
-  const doneRef = React.useMemo(
-    () =>
-      firebase.database().ref(`rooms/${roomId}/users/${getUserName()}/done`),
-    [roomId],
-  )
-  const [done, setDone] = React.useState(
-    undefined as undefined | null | boolean,
-  )
-
-  const makeDone = async (done: boolean) => {
-    await doneRef.set(done)
-    setDone(done)
-  }
-
-  React.useEffect(() => {
-    const callback = doneRef.on('value', (snapshot) => setDone(snapshot.val()))
-    return () => doneRef.off('value', callback)
-  })
-
-  return [done, makeDone]
 }
 
 type RoomSubRoute = '' | 'vote' | 'name' | 'results'

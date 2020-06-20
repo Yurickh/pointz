@@ -2,6 +2,7 @@ import React from 'react'
 import { RouteComponentProps } from '@reach/router'
 import { SEO } from '../components/seo'
 import { BaseLayout } from '../layouts/base'
+import { useSafeEffect } from '../utils/use-safe-effect'
 
 const sample = <Element extends any>(array: Element[]) =>
   array[Math.floor(Math.random() * array.length)]
@@ -26,7 +27,7 @@ export const Loading = (_props: RouteComponentProps<{}>) => {
     [],
   )
 
-  React.useEffect(() => {
+  const changePhrase = React.useCallback(() => {
     const changePhrase = () => {
       if (isMounted.current) {
         setCutePhrase(sample(cutePhrases))
@@ -37,6 +38,8 @@ export const Loading = (_props: RouteComponentProps<{}>) => {
 
     setTimeout(changePhrase, 3000)
   }, [])
+
+  useSafeEffect(changePhrase)
 
   return (
     <BaseLayout>

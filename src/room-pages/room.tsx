@@ -1,64 +1,113 @@
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
-import {
-  joinRoom,
-  leaveRoom,
-  // useActiveTicket,
-  // useRoomResults,
-  // useIsVoting,
-} from '../utils/room'
-import { WaitingRoom } from './waiting-room'
-import { Loading } from './loading'
-import { navigate } from 'gatsby'
+import { SEO } from '../components/seo'
+import { toRoomName } from '../utils/room-name'
+import { PageLayout } from '../layouts/page'
+import { useUserNames, useIsVoting, navigateToRoom } from '../utils/room'
 
-interface RoomProps extends RouteComponentProps<{ roomId: string }> {
-  uid: string
-}
+export const Room = ({
+  roomId,
+  location,
+}: RouteComponentProps<{ roomId: string }>) => {
+  const link = React.useRef(null)
+  const users = useUserNames(roomId)
+  const [isVoting, setIsVoting] = useIsVoting(roomId)
+  const [copiedVisible, setCopiedVisible] = React.useState(false)
 
-export const Room = ({ roomId, uid }: RoomProps) => {
-  const [isLoading, setLoading] = React.useState(true)
-  // const [activeTicket] = useActiveTicket(roomId)
-  // const results = useRoomResults(roomId)
-  // const [isVoting, setIsVoting] = useIsVoting(roomId)
-
-  React.useEffect(() => {
-    if (!uid) return
-
-    try {
-      joinRoom(roomId, uid).then(() => setLoading(false))
-
-      return () => leaveRoom(roomId, uid)
-    } catch (error) {
-      // If joining a room fails, we're likely missing a username
-      navigate('/update-name')
-    }
-  }, [roomId, uid])
-
-  React.useEffect(() => {
-    const onTabClose = () => leaveRoom(roomId, uid)
-
-    window.addEventListener('beforeunload', onTabClose)
-
-    return () => {
-      // We need the timeout, or else it will remove the listener before closing the page
-      setTimeout(() => {
-        window.removeEventListener('beforeunload', onTabClose)
-      }, 0)
-    }
-  }, [roomId, uid])
-
-  // const resetVoting = () => {
-  //   setLoading(true)
-  //   setIsVoting(true).then(() => setLoading(false))
-  // }
-
-  if (isLoading) {
-    return <Loading />
+  const startVote = async (timeout?: number) => {
+    await setIsVoting(true)
+    navigateToRoom(roomId, 'vote', { state: { timeout } })
   }
 
-  // if (isVoting) {
-  //   return <Vote roomId={roomId} uid={uid} activeTicket={activeTicket} />
-  // }
+  React.useEffect(() => {
+    if (isVoting) {
+      navigateToRoom(roomId, 'vote')
+    }
+  }, [isVoting, roomId])
 
-  return <WaitingRoom roomId={roomId} />
+  return (
+    <PageLayout
+      title={
+        <>
+          Welcome to <span className="has-text-primary">☝️ Pointz</span>!
+        </>
+      }
+    >
+      <SEO title={toRoomName(roomId)} />
+      <p className="subtitle is-family-secondary">
+        Here you can either wait for your teammembers to create a request for
+        votes, or you can do it yourself.
+      </p>
+
+      <div className="field is-grouped">
+        <p className="control">
+          <button
+            className="button is-primary is-family-primary"
+            onClick={() => startVote()}
+          >
+            Start voting
+          </button>
+        </p>
+        <p className="control">
+          <button
+            className="button is-secondary is-family-primary"
+            onClick={() => startVote(5)}
+          >
+            Start voting with timeout
+          </button>
+        </p>
+      </div>
+
+      <div className="content is-family-primary">
+        <h3>Current teammembers in this room:</h3>
+        <ul>
+          {users.map((userName) => (
+            <li key={userName}>{userName}</li>
+          ))}
+        </ul>
+      </div>
+
+      <p className="content is-family-secondary">
+        You can invite more by sharing the link:
+      </p>
+
+      <div className="field has-addons">
+        <div className="control is-expanded">
+          <input
+            className="input is-family-primary"
+            readOnly
+            value={location?.href}
+            ref={link}
+          />
+        </div>
+        <div className="control">
+          <span
+            className="is-family-secondary"
+            style={{
+              opacity: copiedVisible ? 1 : 0,
+              transition: 'opacity ease .3s',
+              position: 'absolute',
+              top: '-2em',
+              right: '1ch',
+            }}
+          >
+            Copied!
+          </span>
+          <button
+            className="button is-info is-family-secondary"
+            onClick={() => {
+              if (link.current) {
+                link.current.select()
+                document.execCommand('copy')
+                setCopiedVisible(true)
+                setTimeout(() => setCopiedVisible(false), 1000)
+              }
+            }}
+          >
+            copy
+          </button>
+        </div>
+      </div>
+    </PageLayout>
+  )
 }
