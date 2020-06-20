@@ -27,8 +27,8 @@ export const Navbar = () => (
             Update name
           </Link>
 
-          <Link role="menuitem" className="button is-primary" to="/">
-            <strong>Create a room</strong>
+          <Link role="menuitem" className="button is-primary" to="/join">
+            <strong>Join a room</strong>
           </Link>
         </div>
       </div>
