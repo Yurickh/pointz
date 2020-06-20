@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Router } from '@reach/router'
 import { Room } from '../room-pages/room'
-import NotFoundPage from './404'
+import { Loading } from '../room-pages/loading'
 import { ProvideNameForRoom } from '../room-pages/provide-name-for-room'
 import { signIn } from '../utils/firebase'
 
@@ -18,7 +18,7 @@ const RoomRouter = () => {
     <Router basepath="/room">
       <ProvideNameForRoom path="/:roomId/name" />
       <Room uid={uid} path="/:roomId" />
-      <NotFoundPage default />
+      <Loading default />
     </Router>
   )
 }
