@@ -3,7 +3,7 @@ import { navigate } from 'gatsby'
 import { NavigateOptions } from '@reach/router'
 import firebase from './firebase'
 import { getUserName } from './user'
-import { toRoomName } from './room-name'
+import { toRoomId } from './room-name'
 import { useSafeEffect } from './use-safe-effect'
 
 interface User {
@@ -88,4 +88,4 @@ export const navigateToRoom = (
   roomId: string,
   subroute: RoomSubRoute = '',
   options: NavigateOptions<{}> | undefined = undefined,
-) => navigate(`/room/${toRoomName(roomId)}/${subroute}`, options)
+) => navigate(`/room/${toRoomId(roomId)}/${subroute}`, options)
