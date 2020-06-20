@@ -14,12 +14,12 @@ const UpdateName: React.FunctionComponent<UpdateNameProps> = () => {
   const [name, setName] = React.useState(getUserName() || '')
   const [error, setError] = React.useState(false)
 
-  const handleChange = (newValue) => {
+  const handleChange = (newValue: string) => {
     setName(newValue)
     setError(false)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault()
 
     if (name) {
@@ -41,7 +41,11 @@ const UpdateName: React.FunctionComponent<UpdateNameProps> = () => {
         label="Your name"
         value={name}
         onChange={handleChange}
-        error={error && 'Please provide a name with at least one character'}
+        error={
+          error
+            ? 'Please provide a name with at least one character'
+            : undefined
+        }
       />
       <SubmitButton
         onClick={handleSubmit}

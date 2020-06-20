@@ -7,7 +7,7 @@ import { Navbar } from '../components/navbar'
 
 const Yurick = () => <a href="https://github.com/Yurickh">Yurick</a>
 
-export const BaseLayout = ({ children }) => (
+export const BaseLayout: React.FunctionComponent = ({ children }) => (
   <>
     <Navbar />
     <main>{children}</main>

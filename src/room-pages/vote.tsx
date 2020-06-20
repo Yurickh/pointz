@@ -17,12 +17,14 @@ const Monospace = ({ children }: { children: ReactNode }) => (
 )
 
 export const Vote: React.FunctionComponent<VoteProps> = ({
-  roomId,
+  roomId = '',
   // location,
-  uid,
+  uid = '',
 }) => {
   // const { timeout } = (location.state || {}) as { timeout?: string }
-  const [selected, setSelected] = React.useState(undefined)
+  const [selected, setSelected] = React.useState(
+    undefined as number | string | undefined,
+  )
   const { remaining, total } = useVotes(roomId)
   const [isVoting] = useIsVoting(roomId)
   const animatedAmount = useEase(total - remaining)
@@ -30,7 +32,7 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
   React.useEffect(() => {
     // if isVoting is null, it means it's still being fetched
     if (isVoting === false) {
-      navigateToRoom(roomId)
+      navigateToRoom(roomId, 'results')
     }
   }, [isVoting, roomId])
 
@@ -56,7 +58,7 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
 
   return (
     <PageLayout title="Choose a point amount">
-      <SEO title={`Vote | ${roomId}`} />
+      <SEO title="Vote" />
       <Monospace>
         {total - remaining}/{total}
       </Monospace>{' '}

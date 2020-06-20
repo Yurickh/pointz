@@ -1,15 +1,14 @@
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
 import { SEO } from '../components/seo'
-import { toRoomName } from '../utils/room-name'
 import { PageLayout } from '../layouts/page'
 import { useUserNames, useIsVoting, navigateToRoom } from '../utils/room'
 
 export const Room = ({
-  roomId,
+  roomId = '',
   location,
 }: RouteComponentProps<{ roomId: string }>) => {
-  const link = React.useRef(null)
+  const link = React.useRef(null as HTMLInputElement | null)
   const users = useUserNames(roomId)
   const [isVoting, setIsVoting] = useIsVoting(roomId)
   const [copiedVisible, setCopiedVisible] = React.useState(false)
@@ -33,7 +32,7 @@ export const Room = ({
         </>
       }
     >
-      <SEO title={toRoomName(roomId)} />
+      <SEO title="Room" />
       <p className="subtitle is-family-secondary">
         Here you can either wait for your teammembers to create a request for
         votes, or you can do it yourself.

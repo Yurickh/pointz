@@ -19,8 +19,6 @@ export const signIn = (): Promise<firebase.User> =>
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         resolve(user)
-      } else {
-        reject({ message: 'User signed out' })
       }
     })
   })

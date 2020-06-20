@@ -10,7 +10,7 @@ import { joinRoom, leaveRoom } from '../utils/room'
 import { navigate } from 'gatsby'
 
 const RoomRouter = ({ location }: RouteComponentProps<{}>) => {
-  const [_empty, _room, roomId] = location.pathname.split('/')
+  const [_empty, _room, roomId] = (location?.pathname || '').split('/')
   const [uid, setUid] = useState('')
   const [isLoading, setLoading] = React.useState(true)
 
@@ -26,7 +26,9 @@ const RoomRouter = ({ location }: RouteComponentProps<{}>) => {
     try {
       joinRoom(roomId, uid).then(() => setLoading(false))
 
-      return () => leaveRoom(roomId, uid)
+      return () => {
+        leaveRoom(roomId, uid)
+      }
     } catch (error) {
       // If joining a room fails, we're likely missing a username
       navigate('/update-name')
