@@ -1,13 +1,28 @@
 import React from 'react'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
+import { RedirectRoom } from '../components/redirect-room'
 import { toRoomName } from '../utils/room-name'
 import { useRoomResults } from '../utils/room'
+import { RouteComponentProps } from '@reach/router'
+import { navigateToRoom } from '../utils/room'
 
-type ResultsProps = {
+type ResultsProps = RouteComponentProps<{
   roomId: string
-  activeTicket: string
-  goBack: () => void
+}>
+
+const backNumberContent = (value: number | string) => {
+  switch (value) {
+    case 'Too much':
+      return '++'
+
+    case Infinity:
+    case -Infinity:
+      return '..'
+
+    default:
+      return value
+  }
 }
 
 const BackNumber = ({ children }: { children: string | number }) => (
@@ -20,7 +35,7 @@ const BackNumber = ({ children }: { children: string | number }) => (
       opacity: 0.3,
     }}
   >
-    {children === 'Too much' ? '++' : children}
+    {backNumberContent(children)}
   </div>
 )
 
@@ -35,26 +50,31 @@ const byEstimation = (
 }
 
 export const Results: React.FunctionComponent<ResultsProps> = ({
-  roomId,
-  activeTicket,
-  goBack,
+  roomId = '',
 }) => {
   const results = useRoomResults(roomId)
-  const votes = Object.values(results)
+
+  const votes = Object.values(results || {})
+  const someoneVotedTooMuch = votes.includes('Too much')
   const points = votes
     .filter((vote) => vote !== 'Too much')
     .map((vote) => parseInt(vote))
 
-  const highest = votes.includes('Too much') ? 'Too much' : Math.max(...points)
+  const highest = someoneVotedTooMuch ? 'Too much' : Math.max(...points)
   const lowest =
-    Math.min(...points) === Infinity ? 'Too much' : Math.min(...points)
+    Math.min(...points) === Infinity && someoneVotedTooMuch
+      ? 'Too much'
+      : Math.min(...points)
+
+  if (results === false) {
+    return <RedirectRoom roomId={roomId} />
+  }
 
   return (
     <PageLayout title="Results">
       <SEO title={`Results | ${toRoomName(roomId)}`} />
-      <p className="subtitle">{activeTicket}</p>
 
-      {votes.length > 0 && (
+      {
         <div className="column">
           <div className="columns">
             <div className="column">
@@ -63,12 +83,14 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
 
                 <div className="content">
                   <ul>
-                    {Object.entries(results)
-                      .filter(([, value]) => value === highest.toString())
-                      .sort()
-                      .map(([username]) => (
-                        <li key={username}>{username}</li>
-                      ))}
+                    {(results
+                      && Object.entries(results)
+                        .filter(([, value]) => value === highest.toString())
+                        .sort()
+                        .map(([username]) => (
+                          <li key={username}>{username}</li>
+                        )))
+                      || 'Loading'}
                   </ul>
                 </div>
 
@@ -82,12 +104,14 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
 
                 <div className="content">
                   <ul>
-                    {Object.entries(results)
-                      .filter(([, value]) => value === lowest.toString())
-                      .sort()
-                      .map(([username]) => (
-                        <li key={username}>{username}</li>
-                      ))}
+                    {(results
+                      && Object.entries(results)
+                        .filter(([, value]) => value === lowest.toString())
+                        .sort()
+                        .map(([username]) => (
+                          <li key={username}>{username}</li>
+                        )))
+                      || 'Loading'}
                   </ul>
                 </div>
 
@@ -104,21 +128,25 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
               </tr>
             </thead>
             <tbody>
-              {Object.entries(results)
-                .sort(byEstimation)
-                .map(([username, estimation]) => (
-                  <tr key={username}>
-                    <td>{username}</td>
-                    <td>{estimation}</td>
-                  </tr>
-                ))}
+              {results
+                && Object.entries(results)
+                  .sort(byEstimation)
+                  .map(([username, estimation]) => (
+                    <tr key={username}>
+                      <td>{username}</td>
+                      <td>{estimation}</td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
-      )}
+      }
 
-      <button className="button is-secondary" onClick={goBack}>
-        Go back to room
+      <button
+        className="button is-primary"
+        onClick={() => navigateToRoom(roomId)}
+      >
+        Go back home
       </button>
     </PageLayout>
   )

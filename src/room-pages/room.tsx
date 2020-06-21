@@ -1,79 +1,123 @@
 import React from 'react'
-import { navigate } from 'gatsby'
 import { RouteComponentProps } from '@reach/router'
-import { BaseLayout } from '../layouts/base'
-import { getUserName } from '../utils/user'
+import { SEO } from '../components/seo'
+import { RedirectRoom } from '../components/redirect-room'
+import { PageLayout } from '../layouts/page'
 import {
-  joinRoom,
-  leaveRoom,
-  useActiveTicket,
-  useUserIsDone,
+  useUserNames,
+  useIsVoting,
+  navigateToRoom,
+  useRoomResults,
 } from '../utils/room'
-import { WaitingRoom } from './waiting-room'
-import { Vote } from './vote'
-import { Results } from './results'
 
-export const Room = ({ roomId }: RouteComponentProps<{ roomId: string }>) => {
-  const username = getUserName()
-  const [isLoading, setLoading] = React.useState(true)
-  const [activeTicket] = useActiveTicket(roomId)
-  const [done, setDone] = useUserIsDone(roomId)
-  const [showResults, setShowResults] = React.useState(false)
+export const Room = ({
+  roomId = '',
+  location,
+}: RouteComponentProps<{ roomId: string }>) => {
+  const link = React.useRef(null as HTMLInputElement | null)
+  const users = useUserNames(roomId)
+  const results = useRoomResults(roomId)
+  const [isVoting, setIsVoting] = useIsVoting(roomId)
+  const [copiedVisible, setCopiedVisible] = React.useState(false)
 
-  React.useEffect(() => {
-    if (username === null) {
-      navigate(`/room/${roomId}/name`, { replace: true })
-    } else {
-      joinRoom(roomId).then(() => setLoading(false))
-    }
-
-    return () => {
-      leaveRoom(roomId)
-    }
-  }, [roomId, username])
-
-  React.useEffect(() => {
-    const onTabClose = () => leaveRoom(roomId)
-
-    window.addEventListener('beforeunload', onTabClose)
-
-    return () => {
-      // We need the timeout, or else it will remove the listener before closing the page
-      setTimeout(() => {
-        window.removeEventListener('beforeunload', onTabClose)
-      }, 0)
-    }
-  }, [roomId])
-
-  // Go back to vote when active ticket is updated
-  React.useEffect(() => {
-    setShowResults(false)
-  }, [activeTicket])
-
-  if (isLoading || done === undefined) {
-    return <BaseLayout> </BaseLayout>
+  if (isVoting) {
+    return <RedirectRoom roomId={roomId} subpath="vote" />
   }
 
-  if (!activeTicket) {
-    return <WaitingRoom roomId={roomId} />
-  }
+  return (
+    <PageLayout
+      title={
+        <>
+          Welcome to <span className="has-text-primary">☝️ Pointz</span>!
+        </>
+      }
+    >
+      <SEO title="Room" />
+      <p className="subtitle is-family-secondary">
+        Here you can either wait for your teammembers to create a request for
+        votes, or you can do it yourself.
+      </p>
 
-  if (showResults) {
-    return (
-      <Results
-        roomId={roomId}
-        activeTicket={activeTicket}
-        goBack={async () => {
-          await setDone(true)
-          setShowResults(false)
-        }}
-      />
-    )
-  }
+      <div className="field is-grouped">
+        <p className="control">
+          <button
+            className="button is-primary is-family-primary"
+            onClick={async () => {
+              await setIsVoting(true)
+              navigateToRoom(roomId, 'vote')
+            }}
+          >
+            Start voting
+          </button>
+        </p>
+        {results !== null && results !== false && (
+          <p className="control">
+            <button
+              className="button is-secondary is-family-primary"
+              onClick={() => navigateToRoom(roomId, 'results')}
+            >
+              Show results from last vote
+            </button>
+          </p>
+        )}
+      </div>
 
-  if (done === true) {
-    return <WaitingRoom roomId={roomId} />
-  }
+      <section>
+        <p className="content is-family-secondary">
+          You can invite more by sharing the link:
+        </p>
 
-  return <Vote roomId={roomId} onDone={() => setShowResults(true)} />
+        <div className="field has-addons">
+          <div className="control is-expanded">
+            <input
+              className="input is-family-primary"
+              readOnly
+              value={location?.href}
+              ref={link}
+            />
+          </div>
+          <div className="control">
+            <span
+              className="is-family-secondary"
+              style={{
+                opacity: copiedVisible ? 1 : 0,
+                transition: 'opacity ease .3s',
+                position: 'absolute',
+                top: '-2em',
+                right: '1ch',
+              }}
+            >
+              Copied!
+            </span>
+            <button
+              className="button is-info is-family-secondary"
+              onClick={() => {
+                if (link.current) {
+                  link.current.select()
+                  document.execCommand('copy')
+                  setCopiedVisible(true)
+                  setTimeout(() => setCopiedVisible(false), 1000)
+                }
+              }}
+            >
+              copy
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="content is-family-primary"
+        style={{ marginTop: '2em' }}
+      >
+        <h3>Current teammembers in this room:</h3>
+
+        <ul>
+          {users.map((userName) => (
+            <li key={userName}>{userName}</li>
+          ))}
+        </ul>
+      </section>
+    </PageLayout>
+  )
 }

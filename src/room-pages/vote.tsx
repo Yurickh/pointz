@@ -1,48 +1,59 @@
 import React, { ReactNode } from 'react'
+import { RouteComponentProps } from '@reach/router'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
-import { useActiveTicket, useRoomUsers } from '../utils/room'
+import { RedirectRoom } from '../components/redirect-room'
+import { useVotes, vote, useIsVoting, useRoomResults } from '../utils/room'
 import { useEase } from '../utils/use-ease'
+import { Loading } from './loading'
 
-type VoteProps = {
+type VoteProps = RouteComponentProps<{
   roomId: string
-  onDone: () => void
-}
+  uid: string
+}>
 
 const Monospace = ({ children }: { children: ReactNode }) => (
   <span className="is-family-monospace">{children}</span>
 )
 
 export const Vote: React.FunctionComponent<VoteProps> = ({
-  roomId,
-  onDone,
+  roomId = '',
+  uid = '',
 }) => {
-  const [activeTicket] = useActiveTicket(roomId)
-  const { amountAnswers, totalAmount, giveAnswer } = useRoomUsers(roomId)
-  const [selected, setSelected] = React.useState(undefined)
-  const animatedAmount = useEase(amountAnswers)
+  const [selected, setSelected] = React.useState(
+    undefined as number | string | undefined,
+  )
+  const { remaining, total } = useVotes(roomId)
+  const [isVoting, setIsVoting] = useIsVoting(roomId)
+  const results = useRoomResults(roomId)
+  const animatedAmount = useEase(total - remaining)
 
-  const missingAmount = totalAmount - amountAnswers
+  // if isVoting is null, it means it's still being fetched
+  if (isVoting === null) {
+    return <Loading />
+  }
 
-  React.useEffect(() => {
-    if (totalAmount > 0 && missingAmount === 0) {
-      onDone()
-    }
-  }, [missingAmount, onDone, totalAmount])
+  // Known issue:
+  // This line makes so accessing a `/vote` of a room that has no results to _not_ navigate home
+  // Instead, it will render the vote page with 1/1 default votes config
+  // This is needed to ensure we don't navigate to the results page before the lambda had a chance
+  // to populate results, thus re-redirecting us to home. 😞
+  if (isVoting === false && results !== null && results !== false) {
+    return <RedirectRoom roomId={roomId} subpath="results" />
+  }
 
   return (
     <PageLayout title="Choose a point amount">
-      <SEO title={`Vote | ${roomId}`} />
-      <p className="subtitle">{activeTicket}</p>
+      <SEO title="Vote" />
       <Monospace>
-        {amountAnswers}/{totalAmount}
+        {total - remaining}/{total}
       </Monospace>{' '}
       people have given their estimations
       <progress
         className="progress is-info"
         style={{ width: '100%' }}
         value={animatedAmount}
-        max={totalAmount}
+        max={total}
       />
       <div className="buttons are-secondary">
         {[1, 2, 3, 5, 8, 13, 21, 'Too much'].map((value) => (
@@ -51,13 +62,16 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
             className={`button ${value === selected ? 'is-info' : ''}`}
             onClick={() => {
               setSelected(value)
-              giveAnswer(value)
+              vote(roomId, uid, value.toString())
             }}
           >
             {value}
           </button>
         ))}
       </div>
+      <button className="button is-danger" onClick={() => setIsVoting(false)}>
+        Stop voting
+      </button>
     </PageLayout>
   )
 }

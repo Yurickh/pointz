@@ -1,8 +1,59 @@
 import React from 'react'
-import { ProvideName } from '../room-pages/provide-name'
+import { FormLayout } from '../layouts/form'
+import { SEO } from '../components/seo'
+import { setUsername, getUserName } from '../utils/user'
+import { TextInput } from '../components/text-input'
+import { SubmitButton } from '../components/submit-button'
+import { RouteComponentProps } from '@reach/router'
 
-const UpdateName: React.FunctionComponent<{}> = () => (
-  <ProvideName onSuccess={() => history.go(-1)} />
-)
+type UpdateNameProps = RouteComponentProps<{
+  roomId: string
+}>
+
+const UpdateName: React.FunctionComponent<UpdateNameProps> = () => {
+  const [name, setName] = React.useState(getUserName() || '')
+  const [error, setError] = React.useState(false)
+
+  const handleChange = (newValue: string) => {
+    setName(newValue)
+    setError(false)
+  }
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault()
+
+    if (name) {
+      setUsername(name)
+      history.back()
+    } else {
+      setError(true)
+    }
+  }
+
+  return (
+    <FormLayout title="What's your name?" onSubmit={handleSubmit}>
+      <SEO title="Choose a name" />
+      <p className="subtitle is-family-primary">
+        Please tell use how you want your teammates to call you
+      </p>
+      <TextInput
+        id="name"
+        label="Your name"
+        value={name}
+        onChange={handleChange}
+        error={
+          error
+            ? 'Please provide a name with at least one character'
+            : undefined
+        }
+      />
+      <SubmitButton
+        onClick={handleSubmit}
+        label={getUserName() ? 'Update' : 'Create'}
+        disabled={name.length === 0}
+      />
+    </FormLayout>
+  )
+}
 
 export default UpdateName

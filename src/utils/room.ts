@@ -1,164 +1,96 @@
 import React from 'react'
-import { mapObject } from '@gutenpress/helpers'
+import { navigate } from 'gatsby'
+import { NavigateOptions } from '@reach/router'
 import firebase from './firebase'
 import { getUserName } from './user'
+import { toRoomId } from './room-name'
+import { useSafeEffect } from './use-safe-effect'
 
 interface User {
-  alive: true
-  answer?: string
-  done?: boolean
+  name: string
+  vote?: string
 }
 
 interface Room {
-  activeTicket?: string
-  users: {
-    [name: string]: User
-  }
+  users: Record<string, User>
+  voting: boolean
+  results: false | Record<string, string>
 }
 
-export const joinRoom = (roomId: string) => {
+export const joinRoom = (roomId: string, uid: string) => {
   const username = getUserName()
 
   if (username === null) throw new Error('You need a name to join a room')
 
   return firebase
     .database()
-    .ref(`rooms/${roomId}/users/${username}/alive`)
-    .set(true)
+    .ref(`rooms/${roomId}/users/${uid}/name`)
+    .set(username)
 }
 
-export const leaveRoom = async (roomId: string) => {
-  const username = getUserName()
+export const leaveRoom = (roomId: string, uid: string) =>
+  firebase.database().ref(`rooms/${roomId}/users/${uid}`).remove()
 
-  if (username === null) return
+const useFirebaseValue = <Value>(ref: string, defaultValue: Value) => {
+  const [value, setValue] = React.useState(defaultValue as Value | null)
 
-  await firebase.database().ref(`rooms/${roomId}/users/${username}`).remove()
+  const syncValue = React.useCallback(() => {
+    const dbRef = firebase.database().ref(ref)
+    const callback = dbRef.on('value', (snapshot) => setValue(snapshot.val()))
 
-  firebase
-    .database()
-    .ref(`rooms/${roomId}`)
-    .transaction((room) => {
-      if (room) {
-        // Delete the room if we're the only ones left
-        if (!room.users) {
-          return null
-        }
-      }
-      return room
-    })
+    return () => dbRef.off('value', callback)
+  }, [ref])
+
+  useSafeEffect(syncValue)
+
+  return value
 }
 
-export const useActiveTicket = (
-  roomId: string,
-): [string, (newTicket: string) => Promise<void>] => {
-  const [activeTicket, setActiveTicket] = React.useState(null as null | string)
+export const useIsVoting = (roomId: string) =>
+  [
+    useFirebaseValue(`rooms/${roomId}/voting`, null as Room['voting'] | null),
+    (newIsVoting: boolean) =>
+      firebase.database().ref(`rooms/${roomId}/voting`).set(newIsVoting),
+  ] as const
 
-  React.useEffect(() => {
-    const ticketRef = firebase.database().ref(`rooms/${roomId}/activeTicket`)
-
-    const callback = ticketRef.on('value', (snapshot) =>
-      setActiveTicket(snapshot.val()),
-    )
-
-    return () => {
-      ticketRef.off('value', callback)
-    }
-  }, [roomId])
-
-  const updateActiveTicket = (newTicket: string) =>
-    firebase
-      .database()
-      .ref(`rooms/${roomId}`)
-      .transaction((room: Room) => {
-        if (room) {
-          room.activeTicket = newTicket
-
-          for (const user of Object.values(room.users)) {
-            delete user.done
-            delete user.answer
-          }
-        }
-        return room
-      })
-
-  return [activeTicket, updateActiveTicket]
-}
-
-export const useRoomUsers = (roomId: string) => {
-  const usersRef = React.useMemo(
-    () => firebase.database().ref(`rooms/${roomId}/users`),
-    [roomId],
+export const useVotes = (roomId: string) => {
+  const users = useFirebaseValue(
+    `rooms/${roomId}/users`,
+    null as Room['users'] | null,
   )
 
-  const [amountAnswers, setAmountAnswers] = React.useState(0)
-  const [totalAmount, setTotalAmount] = React.useState(0)
-
-  const giveAnswer = (answer: number | string) => {
-    usersRef.child(`${getUserName()}/answer`).set(answer.toString())
+  if (users === null) {
+    return {
+      total: 1,
+      remaining: 1,
+    }
   }
-
-  React.useEffect(() => {
-    const callback = usersRef.on('value', (snapshot) => {
-      const users = Object.values(snapshot.val())
-      setTotalAmount(users.length)
-      setAmountAnswers(
-        users.filter((user: User) => user.answer !== undefined).length,
-      )
-    })
-
-    return () => usersRef.off('value', callback)
-  }, [usersRef])
 
   return {
-    amountAnswers,
-    totalAmount,
-    giveAnswer,
+    total: Object.values(users).length,
+    remaining: Object.values(users).filter((user) => !user.vote).length,
   }
 }
 
-export const useRoomResults = (roomId: string) => {
-  const usersRef = React.useMemo(
-    () => firebase.database().ref(`rooms/${roomId}/users`),
-    [roomId],
+export const vote = (roomId: string, uid: string, vote: string) =>
+  firebase.database().ref(`rooms/${roomId}/users/${uid}/vote`).set(vote)
+
+export const useRoomResults = (roomId: string) =>
+  useFirebaseValue(`rooms/${roomId}/results`, null as Room['results'] | null)
+
+export const useUserNames = (roomId: string) => {
+  const users = useFirebaseValue(
+    `rooms/${roomId}/users`,
+    null as Room['users'] | null,
   )
 
-  const [results, setResults] = React.useState({} as Record<string, string>)
-
-  React.useEffect(() => {
-    usersRef.once('value', (snapshot) => {
-      const votes = mapObject<any, Record<string, string>>(
-        ([key, value]) => [key as string, value.answer],
-        snapshot.val(),
-      )
-
-      setResults(votes)
-    })
-  }, [usersRef])
-
-  return results
+  return Object.values(users || {}).map((user) => user.name)
 }
 
-export const useUserIsDone = (
+type RoomSubRoute = '' | 'vote' | 'name' | 'results'
+
+export const navigateToRoom = (
   roomId: string,
-): [boolean, (done: boolean) => Promise<void>] => {
-  const doneRef = React.useMemo(
-    () =>
-      firebase.database().ref(`rooms/${roomId}/users/${getUserName()}/done`),
-    [roomId],
-  )
-  const [done, setDone] = React.useState(
-    undefined as undefined | null | boolean,
-  )
-
-  const makeDone = async (done: boolean) => {
-    await doneRef.set(done)
-    setDone(done)
-  }
-
-  React.useEffect(() => {
-    const callback = doneRef.on('value', (snapshot) => setDone(snapshot.val()))
-    return () => doneRef.off('value', callback)
-  })
-
-  return [done, makeDone]
-}
+  subroute: RoomSubRoute = '',
+  options: NavigateOptions<{}> | undefined = undefined,
+) => navigate(`/room/${toRoomId(roomId)}/${subroute}`, options)
