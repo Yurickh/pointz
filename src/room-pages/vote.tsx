@@ -69,7 +69,11 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
           </button>
         ))}
       </div>
-      <button className="button is-danger" onClick={() => setIsVoting(false)}>
+      <button
+        disabled={total === 1}
+        className="button is-danger"
+        onClick={() => setIsVoting(false)}
+      >
         Stop voting
       </button>
     </PageLayout>
