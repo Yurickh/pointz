@@ -3,7 +3,7 @@ import 'firebase/auth'
 import 'firebase/database'
 
 firebase.initializeApp({
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: process.env.GATSBY_FIREBASE_API_KEY,
   authDomain: 'pointz-69372.firebaseapp.com',
   databaseURL: 'https://pointz-69372.firebaseio.com',
   projectId: 'pointz-69372',
