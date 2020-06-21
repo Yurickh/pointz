@@ -5,6 +5,7 @@ import { toRoomName } from '../utils/room-name'
 import { useRoomResults } from '../utils/room'
 import { RouteComponentProps } from '@reach/router'
 import { navigateToRoom } from '../utils/room'
+import { Loading } from './loading'
 
 type ResultsProps = RouteComponentProps<{
   roomId: string
@@ -53,6 +54,10 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
       navigateToRoom(roomId)
     }
   }, [results, roomId, votes])
+
+  if (results === false) {
+    return <Loading />
+  }
 
   return (
     <PageLayout title="Results">

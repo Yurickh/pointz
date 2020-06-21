@@ -1,9 +1,9 @@
 import React, { ReactNode } from 'react'
+import { RouteComponentProps } from '@reach/router'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
 import { useVotes, vote, navigateToRoom, useIsVoting } from '../utils/room'
 import { useEase } from '../utils/use-ease'
-import { RouteComponentProps } from '@reach/router'
 import { Loading } from './loading'
 
 type VoteProps = RouteComponentProps<{
@@ -33,7 +33,7 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
     }
   }, [isVoting, roomId])
 
-  if (isVoting === null) {
+  if (isVoting === null || isVoting === false) {
     return <Loading />
   }
 
