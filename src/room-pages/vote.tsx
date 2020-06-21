@@ -2,7 +2,8 @@ import React, { ReactNode } from 'react'
 import { RouteComponentProps } from '@reach/router'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
-import { useVotes, vote, navigateToRoom, useIsVoting } from '../utils/room'
+import { RedirectRoom } from '../components/redirect-room'
+import { useVotes, vote, useIsVoting } from '../utils/room'
 import { useEase } from '../utils/use-ease'
 import { Loading } from './loading'
 
@@ -26,15 +27,13 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
   const [isVoting, setIsVoting] = useIsVoting(roomId)
   const animatedAmount = useEase(total - remaining)
 
-  React.useEffect(() => {
-    // if isVoting is null, it means it's still being fetched
-    if (isVoting === false) {
-      navigateToRoom(roomId, 'results')
-    }
-  }, [isVoting, roomId])
-
-  if (isVoting === null || isVoting === false) {
+  // if isVoting is null, it means it's still being fetched
+  if (isVoting === null) {
     return <Loading />
+  }
+
+  if (isVoting === false) {
+    return <RedirectRoom roomId={roomId} subpath="results" />
   }
 
   return (

@@ -1,6 +1,7 @@
 import React from 'react'
 import { RouteComponentProps } from '@reach/router'
 import { SEO } from '../components/seo'
+import { RedirectRoom } from '../components/redirect-room'
 import { PageLayout } from '../layouts/page'
 import { useUserNames, useIsVoting, navigateToRoom } from '../utils/room'
 
@@ -13,16 +14,14 @@ export const Room = ({
   const [isVoting, setIsVoting] = useIsVoting(roomId)
   const [copiedVisible, setCopiedVisible] = React.useState(false)
 
-  const startVote = async (timeout?: number) => {
+  const startVote = async () => {
     await setIsVoting(true)
-    navigateToRoom(roomId, 'vote', { state: { timeout } })
+    navigateToRoom(roomId, 'vote')
   }
 
-  React.useEffect(() => {
-    if (isVoting) {
-      navigateToRoom(roomId, 'vote')
-    }
-  }, [isVoting, roomId])
+  if (isVoting) {
+    return <RedirectRoom roomId={roomId} subpath="vote" />
+  }
 
   return (
     <PageLayout
@@ -42,7 +41,7 @@ export const Room = ({
         <p className="control">
           <button
             className="button is-primary is-family-primary"
-            onClick={() => startVote()}
+            onClick={startVote}
           >
             Start voting
           </button>
@@ -50,7 +49,7 @@ export const Room = ({
         <p className="control">
           <button
             className="button is-secondary is-family-primary"
-            onClick={() => startVote(5)}
+            onClick={startVote}
           >
             Start voting with timeout
           </button>

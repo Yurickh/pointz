@@ -1,11 +1,11 @@
 import React from 'react'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
+import { RedirectRoom } from '../components/redirect-room'
 import { toRoomName } from '../utils/room-name'
 import { useRoomResults } from '../utils/room'
 import { RouteComponentProps } from '@reach/router'
 import { navigateToRoom } from '../utils/room'
-import { Loading } from './loading'
 
 type ResultsProps = RouteComponentProps<{
   roomId: string
@@ -49,14 +49,8 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
   const lowest =
     Math.min(...points) === Infinity ? 'Too much' : Math.min(...points)
 
-  React.useEffect(() => {
-    if (results === false) {
-      navigateToRoom(roomId)
-    }
-  }, [results, roomId, votes])
-
   if (results === false) {
-    return <Loading />
+    return <RedirectRoom roomId={roomId} />
   }
 
   return (
