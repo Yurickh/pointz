@@ -62,56 +62,62 @@ export const Room = ({
         )}
       </div>
 
-      <div className="content is-family-primary">
+      <section>
+        <p className="content is-family-secondary">
+          You can invite more by sharing the link:
+        </p>
+
+        <div className="field has-addons">
+          <div className="control is-expanded">
+            <input
+              className="input is-family-primary"
+              readOnly
+              value={location?.href}
+              ref={link}
+            />
+          </div>
+          <div className="control">
+            <span
+              className="is-family-secondary"
+              style={{
+                opacity: copiedVisible ? 1 : 0,
+                transition: 'opacity ease .3s',
+                position: 'absolute',
+                top: '-2em',
+                right: '1ch',
+              }}
+            >
+              Copied!
+            </span>
+            <button
+              className="button is-info is-family-secondary"
+              onClick={() => {
+                if (link.current) {
+                  link.current.select()
+                  document.execCommand('copy')
+                  setCopiedVisible(true)
+                  setTimeout(() => setCopiedVisible(false), 1000)
+                }
+              }}
+            >
+              copy
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="content is-family-primary"
+        style={{ marginTop: '2em' }}
+      >
         <h3>Current teammembers in this room:</h3>
+
         <ul>
           {users.map((userName) => (
             <li key={userName}>{userName}</li>
           ))}
         </ul>
-      </div>
-
-      <p className="content is-family-secondary">
-        You can invite more by sharing the link:
-      </p>
-
-      <div className="field has-addons">
-        <div className="control is-expanded">
-          <input
-            className="input is-family-primary"
-            readOnly
-            value={location?.href}
-            ref={link}
-          />
-        </div>
-        <div className="control">
-          <span
-            className="is-family-secondary"
-            style={{
-              opacity: copiedVisible ? 1 : 0,
-              transition: 'opacity ease .3s',
-              position: 'absolute',
-              top: '-2em',
-              right: '1ch',
-            }}
-          >
-            Copied!
-          </span>
-          <button
-            className="button is-info is-family-secondary"
-            onClick={() => {
-              if (link.current) {
-                link.current.select()
-                document.execCommand('copy')
-                setCopiedVisible(true)
-                setTimeout(() => setCopiedVisible(false), 1000)
-              }
-            }}
-          >
-            copy
-          </button>
-        </div>
-      </div>
+      </section>
     </PageLayout>
   )
 }

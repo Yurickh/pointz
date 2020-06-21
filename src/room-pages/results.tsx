@@ -11,6 +11,20 @@ type ResultsProps = RouteComponentProps<{
   roomId: string
 }>
 
+const backNumberContent = (value: number | string) => {
+  switch (value) {
+    case 'Too much':
+      return '++'
+
+    case Infinity:
+    case -Infinity:
+      return '..'
+
+    default:
+      return value
+  }
+}
+
 const BackNumber = ({ children }: { children: string | number }) => (
   <div
     style={{
@@ -21,7 +35,7 @@ const BackNumber = ({ children }: { children: string | number }) => (
       opacity: 0.3,
     }}
   >
-    {children === 'Too much' ? '++' : children}
+    {backNumberContent(children)}
   </div>
 )
 
@@ -41,13 +55,16 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
   const results = useRoomResults(roomId)
 
   const votes = Object.values(results || {})
+  const someoneVotedTooMuch = votes.includes('Too much')
   const points = votes
     .filter((vote) => vote !== 'Too much')
     .map((vote) => parseInt(vote))
 
-  const highest = votes.includes('Too much') ? 'Too much' : Math.max(...points)
+  const highest = someoneVotedTooMuch ? 'Too much' : Math.max(...points)
   const lowest =
-    Math.min(...points) === Infinity ? 'Too much' : Math.min(...points)
+    Math.min(...points) === Infinity && someoneVotedTooMuch
+      ? 'Too much'
+      : Math.min(...points)
 
   if (results === false) {
     return <RedirectRoom roomId={roomId} />
@@ -57,7 +74,7 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
     <PageLayout title="Results">
       <SEO title={`Results | ${toRoomName(roomId)}`} />
 
-      {votes.length > 0 && (
+      {
         <div className="column">
           <div className="columns">
             <div className="column">
@@ -66,13 +83,14 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
 
                 <div className="content">
                   <ul>
-                    {results
+                    {(results
                       && Object.entries(results)
                         .filter(([, value]) => value === highest.toString())
                         .sort()
                         .map(([username]) => (
                           <li key={username}>{username}</li>
-                        ))}
+                        )))
+                      || 'Loading'}
                   </ul>
                 </div>
 
@@ -86,13 +104,14 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
 
                 <div className="content">
                   <ul>
-                    {results
+                    {(results
                       && Object.entries(results)
                         .filter(([, value]) => value === lowest.toString())
                         .sort()
                         .map(([username]) => (
                           <li key={username}>{username}</li>
-                        ))}
+                        )))
+                      || 'Loading'}
                   </ul>
                 </div>
 
@@ -121,13 +140,13 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
             </tbody>
           </table>
         </div>
-      )}
+      }
 
       <button
         className="button is-primary"
         onClick={() => navigateToRoom(roomId)}
       >
-        Go back to home
+        Go back home
       </button>
     </PageLayout>
   )
