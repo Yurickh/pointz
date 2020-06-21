@@ -3,7 +3,7 @@ import { RouteComponentProps } from '@reach/router'
 import { PageLayout } from '../layouts/page'
 import { SEO } from '../components/seo'
 import { RedirectRoom } from '../components/redirect-room'
-import { useVotes, vote, useIsVoting } from '../utils/room'
+import { useVotes, vote, useIsVoting, useRoomResults } from '../utils/room'
 import { useEase } from '../utils/use-ease'
 import { Loading } from './loading'
 
@@ -25,6 +25,7 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
   )
   const { remaining, total } = useVotes(roomId)
   const [isVoting, setIsVoting] = useIsVoting(roomId)
+  const results = useRoomResults(roomId)
   const animatedAmount = useEase(total - remaining)
 
   // if isVoting is null, it means it's still being fetched
@@ -32,7 +33,12 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
     return <Loading />
   }
 
-  if (isVoting === false) {
+  // Known issue:
+  // This line makes so accessing a `/vote` of a room that has no results to _not_ navigate home
+  // Instead, it will render the vote page with 1/1 default votes config
+  // This is needed to ensure we don't navigate to the results page before the lambda had a chance
+  // to populate results, thus re-redirecting us to home. 😞
+  if (isVoting === false && results !== null && results !== false) {
     return <RedirectRoom roomId={roomId} subpath="results" />
   }
 
