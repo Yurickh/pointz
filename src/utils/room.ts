@@ -62,7 +62,7 @@ export const useVotes = (roomId: string) => {
   if (users === null) {
     return {
       total: 1,
-      remaining: 0,
+      remaining: 1,
     }
   }
 

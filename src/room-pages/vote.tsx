@@ -4,7 +4,6 @@ import { SEO } from '../components/seo'
 import { useVotes, vote, navigateToRoom, useIsVoting } from '../utils/room'
 import { useEase } from '../utils/use-ease'
 import { RouteComponentProps } from '@reach/router'
-// import { useSafeEffect } from '../utils/use-safe-effect'
 import { Loading } from './loading'
 
 type VoteProps = RouteComponentProps<{
@@ -18,15 +17,13 @@ const Monospace = ({ children }: { children: ReactNode }) => (
 
 export const Vote: React.FunctionComponent<VoteProps> = ({
   roomId = '',
-  // location,
   uid = '',
 }) => {
-  // const { timeout } = (location.state || {}) as { timeout?: string }
   const [selected, setSelected] = React.useState(
     undefined as number | string | undefined,
   )
   const { remaining, total } = useVotes(roomId)
-  const [isVoting] = useIsVoting(roomId)
+  const [isVoting, setIsVoting] = useIsVoting(roomId)
   const animatedAmount = useEase(total - remaining)
 
   React.useEffect(() => {
@@ -35,22 +32,6 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
       navigateToRoom(roomId, 'results')
     }
   }, [isVoting, roomId])
-
-  // COMBAK: add timeout once basic voting works
-  // const navigateWhenTimeout = React.useCallback(() => {
-  //   if (timeout !== undefined) {
-  //     const id = setTimeout(
-  //       () => navigateToRoom(roomId, 'results'),
-  //       parseInt(timeout),
-  //     )
-
-  //     return () => {
-  //       clearTimeout(id)
-  //     }
-  //   }
-  // }, [roomId, timeout])
-
-  // useSafeEffect(navigateWhenTimeout)
 
   if (isVoting === null) {
     return <Loading />
@@ -83,6 +64,9 @@ export const Vote: React.FunctionComponent<VoteProps> = ({
           </button>
         ))}
       </div>
+      <button className="button is-danger" onClick={() => setIsVoting(false)}>
+        Stop voting
+      </button>
     </PageLayout>
   )
 }
