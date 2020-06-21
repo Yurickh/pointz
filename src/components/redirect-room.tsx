@@ -14,7 +14,10 @@ export const RedirectRoom: React.FunctionComponent<RedirectRoomProps> = ({
   options,
 }) => {
   React.useEffect(() => {
-    navigateToRoom(roomId, subpath, options)
+    // HACK: we wait a bit to let the lambdas run :p~
+    setTimeout(() => {
+      navigateToRoom(roomId, subpath, options)
+    }, 200)
   })
 
   return <Loading />

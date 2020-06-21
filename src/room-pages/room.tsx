@@ -3,7 +3,12 @@ import { RouteComponentProps } from '@reach/router'
 import { SEO } from '../components/seo'
 import { RedirectRoom } from '../components/redirect-room'
 import { PageLayout } from '../layouts/page'
-import { useUserNames, useIsVoting, navigateToRoom } from '../utils/room'
+import {
+  useUserNames,
+  useIsVoting,
+  navigateToRoom,
+  useRoomResults,
+} from '../utils/room'
 
 export const Room = ({
   roomId = '',
@@ -11,13 +16,9 @@ export const Room = ({
 }: RouteComponentProps<{ roomId: string }>) => {
   const link = React.useRef(null as HTMLInputElement | null)
   const users = useUserNames(roomId)
+  const results = useRoomResults(roomId)
   const [isVoting, setIsVoting] = useIsVoting(roomId)
   const [copiedVisible, setCopiedVisible] = React.useState(false)
-
-  const startVote = async () => {
-    await setIsVoting(true)
-    navigateToRoom(roomId, 'vote')
-  }
 
   if (isVoting) {
     return <RedirectRoom roomId={roomId} subpath="vote" />
@@ -41,19 +42,24 @@ export const Room = ({
         <p className="control">
           <button
             className="button is-primary is-family-primary"
-            onClick={startVote}
+            onClick={async () => {
+              await setIsVoting(true)
+              navigateToRoom(roomId, 'vote')
+            }}
           >
             Start voting
           </button>
         </p>
-        <p className="control">
-          <button
-            className="button is-secondary is-family-primary"
-            onClick={startVote}
-          >
-            Start voting with timeout
-          </button>
-        </p>
+        {results !== null && results !== false && (
+          <p className="control">
+            <button
+              className="button is-secondary is-family-primary"
+              onClick={() => navigateToRoom(roomId, 'results')}
+            >
+              Show results from last vote
+            </button>
+          </p>
+        )}
       </div>
 
       <div className="content is-family-primary">
