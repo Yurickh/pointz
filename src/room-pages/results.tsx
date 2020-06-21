@@ -49,7 +49,7 @@ export const Results: React.FunctionComponent<ResultsProps> = ({
     Math.min(...points) === Infinity ? 'Too much' : Math.min(...points)
 
   React.useEffect(() => {
-    if (results === null) {
+    if (results === false) {
       navigateToRoom(roomId)
     }
   }, [results, roomId, votes])

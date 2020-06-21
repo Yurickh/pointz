@@ -11,6 +11,12 @@ interface User {
   vote?: string
 }
 
+interface Room {
+  users: Record<string, User>
+  voting: boolean
+  results: false | Record<string, string>
+}
+
 export const joinRoom = (roomId: string, uid: string) => {
   const username = getUserName()
 
@@ -42,7 +48,7 @@ const useFirebaseValue = <Value>(ref: string, defaultValue: Value) => {
 
 export const useIsVoting = (roomId: string) =>
   [
-    useFirebaseValue(`rooms/${roomId}/voting`, null as boolean | null),
+    useFirebaseValue(`rooms/${roomId}/voting`, null as Room['voting'] | null),
     (newIsVoting: boolean) =>
       firebase.database().ref(`rooms/${roomId}/voting`).set(newIsVoting),
   ] as const
@@ -50,7 +56,7 @@ export const useIsVoting = (roomId: string) =>
 export const useVotes = (roomId: string) => {
   const users = useFirebaseValue(
     `rooms/${roomId}/users`,
-    {} as Record<string, User>,
+    null as Room['users'] | null,
   )
 
   if (users === null) {
@@ -70,16 +76,15 @@ export const vote = (roomId: string, uid: string, vote: string) =>
   firebase.database().ref(`rooms/${roomId}/users/${uid}/vote`).set(vote)
 
 export const useRoomResults = (roomId: string) =>
-  useFirebaseValue(
-    `rooms/${roomId}/results`,
-    undefined as Record<string, string> | undefined,
-  )
+  useFirebaseValue(`rooms/${roomId}/results`, null as Room['results'] | null)
 
 export const useUserNames = (roomId: string) => {
-  const users =
-    useFirebaseValue(`rooms/${roomId}/users`, {} as Record<string, User>) || {}
+  const users = useFirebaseValue(
+    `rooms/${roomId}/users`,
+    null as Room['users'] | null,
+  )
 
-  return Object.values(users).map((user) => user.name)
+  return Object.values(users || {}).map((user) => user.name)
 }
 
 type RoomSubRoute = '' | 'vote' | 'name' | 'results'
